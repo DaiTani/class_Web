@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}班级回忆录 - 生工24-3班{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">班级回忆录</h1>
+    <p class="text-xl text-gray-600 max-w-2xl mx-auto">珍藏班级点滴，记录美好瞬间，共同创建属于我们的青春纪念册</p>
+</div>
+
+<!-- 时间线导航 -->
+<div class="flex overflow-x-auto pb-4 mb-8">
+    <div class="flex space-x-3">
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow active-tab whitespace-nowrap">
+            <i class="fas fa-star mr-2 text-yellow-500"></i> 精选回忆
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            2024年
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            2023年
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            班级活动
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            学习时刻
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            生活日常
+        </button>
+        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
+            毕业纪念
+        </button>
+    </div>
+</div>
+
+<!-- 照片网格 -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+    <!-- 照片1 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-camera text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">开学典礼</div>
+            <div class="text-xs opacity-80">2023.09.01 · 45张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片2 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-flask text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">实验室日常</div>
+            <div class="text-xs opacity-80">2023.10.15 · 28张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片3 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-utensils text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">班级聚餐</div>
+            <div class="text-xs opacity-80">2023.12.25 · 36张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片4 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-running text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">校运动会</div>
+            <div class="text-xs opacity-80">2024.04.10 · 52张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片5 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-tree text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">春游踏青</div>
+            <div class="text-xs opacity-80">2024.03.22 · 41张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片6 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-microscope text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">生物实验课</div>
+            <div class="text-xs opacity-80">2024.05.15 · 33张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片7 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-music text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">迎新晚会</div>
+            <div class="text-xs opacity-80">2023.09.30 · 48张照片</div>
+        </div>
+    </div>
+    
+    <!-- 照片8 -->
+    <div class="photo-card card aspect-square">
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-book-reader text-gray-400 text-3xl"></i>
+        </div>
+        <div class="photo-info">
+            <div class="text-sm font-semibold">期末复习</div>
+            <div class="text-xs opacity-80">2024.01.05 · 29张照片</div>
+        </div>
+    </div>
+</div>
+
+<!-- 上传照片按钮 -->
+{% if current_user.is_authenticated %}
+<div class="text-center mt-12">
+    <button class="px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-green-600 transition flex items-center mx-auto">
+        <i class="fas fa-upload mr-2"></i> 上传新相册
+    </button>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .photo-card {
+        overflow: hidden;
+        border-radius: 12px;
+        position: relative;
+    }
+    .photo-card img {
+        transition: transform 0.5s ease;
+    }
+    .photo-card:hover img {
+        transform: scale(1.05);
+    }
+    .photo-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 10px;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    .photo-card:hover .photo-info {
+        transform: translateY(0);
+    }
+    .active-tab {
+        background: #4F46E5;
+        color: white;
+    }
+</style>
+{% endblock %}

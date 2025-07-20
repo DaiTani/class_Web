@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 生工24-3班</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        light: '#F9FAFB',
+                        dark: '#1F2937'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+            min-height: 100vh;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .team-card {
+            transition: all 0.3s ease;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3">
+                <i class="fas fa-graduation-cap text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">生工24-3班</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a href="班级社区平台.html" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a href="论坛.html" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
+                <i class="fas fa-comments mr-2"></i>论坛
+            </a>
+            <a href="回忆录.html" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
+                <i class="fas fa-images mr-2"></i>回忆录
+            </a>
+            <a href="关于我们.html" class="px-4 py-2 rounded-lg font-medium bg-primary text-white hover:bg-indigo-700 transition">
+                <i class="fas fa-users mr-2"></i>关于我们
+            </a>
+        </div>
+    </nav>
+
+    <!-- 关于我们内容 -->
+    <main class="container mx-auto px-4 py-12 max-w-5xl">
+        <div class="text-center mb-14">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">关于我们</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">生工24-3班专属社区，连接每一位同学，记录青春点滴，见证共同成长。</p>
+        </div>
+        
+        <!-- 平台愿景 -->
+        <section class="bg-white card p-8 mb-12 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                <h2 class="text-2xl font-bold text-primary mb-4">我们的愿景</h2>
+                <p class="text-gray-700 mb-3">生工24-3班社区平台由班级技术小组于2023年9月发起，致力于打造一个高效、温馨的线上家园。</p>
+                <ul class="list-disc pl-5 text-gray-600 space-y-1 mb-4">
+                    <li>促进班级成员交流与协作</li>
+                    <li>共享学习资源与活动信息</li>
+                    <li>珍藏每一份青春回忆</li>
+                </ul>
+                <div class="flex items-center mt-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 flex items-center justify-center mr-4">
+                        <i class="fas fa-bullseye text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800">我们的使命</h3>
+                        <p class="text-gray-600 text-sm">让沟通更高效，让回忆更持久</p>
+                    </div>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">平台数据</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-3xl font-bold text-primary mb-1">45</div>
+                            <div class="text-gray-600 text-sm">班级成员</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-3xl font-bold text-green-500 mb-1">128</div>
+                            <div class="text-gray-600 text-sm">论坛话题</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-3xl font-bold text-purple-500 mb-1">624</div>
+                            <div class="text-gray-600 text-sm">回忆照片</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg text-center">
+                            <div class="text-3xl font-bold text-yellow-500 mb-1">24</div>
+                            <div class="text-gray-600 text-sm">班级活动</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 开发团队 -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-center text-primary mb-2">开发团队</h2>
+            <p class="text-gray-600 text-center max-w-2xl mx-auto mb-10">由热爱技术的同学自发组建，利用课余时间共同开发和维护平台。</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 成员1 -->
+                <div class="team-card card text-center p-6">
+                    <div class="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-4 overflow-hidden flex items-center justify-center">
+                        <i class="fas fa-user text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">张明</h3>
+                    <div class="text-primary font-medium mb-2">前端开发</div>
+                    <p class="text-gray-600 mb-3 text-sm">界面设计与用户体验</p>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fab fa-github text-gray-600"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fab fa-weixin text-green-500"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- 成员2 -->
+                <div class="team-card card text-center p-6">
+                    <div class="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-4 overflow-hidden flex items-center justify-center">
+                        <i class="fas fa-user text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">王雪</h3>
+                    <div class="text-primary font-medium mb-2">后端开发</div>
+                    <p class="text-gray-600 mb-3 text-sm">服务器与数据库设计</p>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fab fa-github text-gray-600"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fab fa-qq text-blue-500"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- 成员3 -->
+                <div class="team-card card text-center p-6">
+                    <div class="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-4 overflow-hidden flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">李老师</h3>
+                    <div class="text-primary font-medium mb-2">指导老师</div>
+                    <p class="text-gray-600 mb-3 text-sm">设计建议与资源支持</p>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fas fa-envelope text-gray-600"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fas fa-phone text-blue-500"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 发展历程 -->
+        <section class="bg-white card p-8 mb-12">
+            <h2 class="text-2xl font-bold text-primary mb-6">发展历程</h2>
+            <div class="flex flex-col md:flex-row">
+                <div class="md:w-1/2 md:pr-8">
+                    <ul class="space-y-5">
+                        <li>
+                            <div class="text-lg font-bold text-gray-700 mb-1">2023年9月</div>
+                            <div class="text-gray-600 text-sm">项目启动，组建技术小组，需求分析与规划</div>
+                        </li>
+                        <li>
+                            <div class="text-lg font-bold text-gray-700 mb-1">2023年11月</div>
+                            <div class="text-gray-600 text-sm">首版上线，开放班级论坛功能</div>
+                        </li>
+                        <li>
+                            <div class="text-lg font-bold text-gray-700 mb-1">2024年1月</div>
+                            <div class="text-gray-600 text-sm">回忆录功能上线，获得积极反馈</div>
+                        </li>
+                        <li>
+                            <div class="text-lg font-bold text-gray-700 mb-1">2024年3月</div>
+                            <div class="text-gray-600 text-sm">移动端适配完成，全平台支持</div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="md:w-1/2 mt-8 md:mt-0">
+                    <div class="bg-gradient-to-b from-blue-50 to-purple-50 rounded-xl p-6 h-full">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">未来规划</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>开发班级活动日历</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>实现学习资源云盘</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>增加通知推送系统</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>毕业纪念册生成工具</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>持续优化移动端体验</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 联系我们 -->
+        <section class="bg-gradient-to-r from-primary to-indigo-700 rounded-xl p-8 text-white">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-2xl font-bold mb-3">联系我们</h2>
+                <p class="mb-5 opacity-90">有建议或问题？欢迎随时联系开发团队，共同完善我们的平台。</p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-envelope text-xl mr-2"></i>
+                        <span>tech@bioeng24-3.com</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fab fa-qq text-xl mr-2"></i>
+                        <span>123456789</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fab fa-weixin text-xl mr-2"></i>
+                        <span>BioEng24-3</span>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <a href="mailto:tech@bioeng24-3.com" class="px-6 py-3 bg-white text-primary rounded-lg font-bold hover:bg-gray-100 transition inline-block">
+                        <i class="fas fa-paper-plane mr-2"></i> 发送反馈
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12 mt-12">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3">
+                            <i class="fas fa-graduation-cap text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">2024级生物工程3班</h3>
+                    </div>
+                    <p class="text-gray-400">连接班级成员，珍藏青春回忆，构建属于我们的线上家园。</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">平台功能</h4>
+                    <ul class="space-y-2">
+                        <li><a href="班级社区平台.html" class="text-gray-400 hover:text-white transition">班级首页</a></li>
+                        <li><a href="论坛.html" class="text-gray-400 hover:text-white transition">班级论坛</a></li>
+                        <li><a href="回忆录.html" class="text-gray-400 hover:text-white transition">班级回忆录</a></li>
+                        <li><a href="关于我们.html" class="text-gray-400 hover:text-white transition">关于我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">帮助支持</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">使用指南</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">常见问题</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">意见反馈</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">联系我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">关注我们</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-primary transition">
+                            <i class="fab fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-blue-500 transition">
+                            <i class="fab fa-qq"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-red-500 transition">
+                            <i class="fab fa-weibo"></i>
+                        </a>
+                    </div>
+                    <p class="mt-4 text-gray-400">2425476264tan@Gmail.com</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© YZDR. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // 登录模态框交互
+        const authModal = document.getElementById('authModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const closeModal = document.getElementById('closeModal');
+        
+        // 打开登录模态框
+        loginBtn.addEventListener('click', () => {
+            authModal.style.display = 'flex';
+        });
+        
+        // 关闭模态框
+        closeModal.addEventListener('click', () => {
+            authModal.style.display = 'none';
+        });
+        
+        // 点击模态框外部关闭
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+            if (e.target === authModal) {
+                authModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

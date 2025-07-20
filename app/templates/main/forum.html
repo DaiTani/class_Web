@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}班级论坛 - 生工24-3班{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">班级论坛</h1>
+        <p class="text-gray-600">学习交流、资源共享、活动组织的班级社区</p>
+    </div>
+    {% if current_user.is_authenticated %}
+        <!-- 移除以下冗余按钮 -->
+        <!-- <button onclick="location.href='{{ url_for('main.create_post') }}'" class="mt-4 md:mt-0 px-5 py-3 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center">
+        <!--     <i class="fas fa-plus mr-2"></i> 发布新话题
+        <!-- </button> -->
+        
+        <!-- 管理员分类管理链接 -->
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('main.manage_categories') }}" class="mt-4 md:mt-0 ml-2 px-5 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition flex items-center">
+            <i class="fas fa-cog mr-2"></i> 分类管理
+        </a>
+        {% endif %}
+    {% else %}
+        <button onclick="location.href='{{ url_for('auth.login') }}'" class="mt-4 md:mt-0 px-5 py-3 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center">
+            <i class="fas fa-lock mr-2"></i> 登录后发布
+        </button>
+    {% endif %}
+</div>
+
+<!-- 分类标签 -->
+<div class="flex flex-wrap gap-3 mb-8">
+    <a href="{{ url_for('main.forum', category='all') }}" class="px-4 py-2 rounded-full font-medium shadow {% if selected_category == 'all' %}bg-primary text-white{% else %}bg-white text-gray-800 hover:bg-gray-50{% endif %}">
+        <i class="fas fa-th-large mr-2"></i> 全部话题
+    </a>
+    {% for category in categories %}
+    <a href="{{ url_for('main.forum', category=category) }}" class="px-4 py-2 rounded-full font-medium shadow ...">
+        <i class="fas fa-tag mr-2"></i> {{ category }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- 话题列表 -->
+<div class="bg-white p-6 rounded-lg shadow-sm mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">发布新话题</h2>
+    <form method="POST" action="{{ url_for('main.create_post') }}">
+        <div class="mb-4">
+            <input type="text" name="title" placeholder="标题" class="w-full p-3 border rounded-lg" required>
+        </div>
+        <div class="mb-4">
+            <select name="category" class="w-full p-3 border rounded-lg" required>
+                <option value="">选择分类</option>
+                {% if categories and categories|length > 0 %}
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                {% endif %}
+                <!-- 添加固定分类选项 -->
+                <option value="学习交流">学习交流</option>
+                <option value="资源共享">资源共享</option>
+                <option value="活动组织">活动组织</option>
+                <option value="问题求助">问题求助</option>
+                <option value="创意分享">创意分享</option>
+                <option value="other">其他</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <textarea name="content" rows="4" placeholder="内容" class="w-full p-3 border rounded-lg" required></textarea>
+        </div>
+        <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition flex items-center">
+            <i class="fas fa-paper-plane mr-2"></i> 发布
+        </button>
+    </form>
+</div>
+
+<!-- 现有话题列表 -->
+<div class="space-y-6">
+    {% for post in posts %}
+    <div class="bg-white p-6 rounded-lg shadow-sm {% if post.is_sticky %}border-l-4 border-red-500{% endif %}">
+        <div class="flex items-center mb-4">
+            <img src="https://picsum.photos/id/{{ post.author_id }}/40/40" alt="用户头像" class="w-10 h-10 rounded-full mr-3">
+            <div>
+                <div class="font-medium text-gray-800">{{ post.author.name }}</div>
+                <div class="text-gray-500 text-sm">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+            {% if post.is_sticky %}
+            <span class="ml-4 bg-red-500 text-white text-xs px-2 py-1 rounded flex items-center">
+                <i class="fas fa-thumbtack mr-1"></i> 置顶
+            </span>
+            {% endif %}
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">
+            <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="hover:text-primary transition">{{ post.title }}</a>
+        </h3>
+        <p class="text-gray-600 mb-4">{{ post.content[:150] }}...</p>
+        <div class="flex items-center text-gray-500 text-sm">
+            <span class="mr-4"><i class="fas fa-comment mr-1"></i> {{ post.comments|length }} 评论</span>
+            <span class="mr-4"><i class="fas fa-eye mr-1"></i> {{ post.view_count }} 浏览</span>
+            <span class="mr-4"><i class="fas fa-folder mr-1"></i> {{ post.category }}</span>
+            {% if current_user.is_authenticated and current_user.id == post.author_id %}
+            <form id="delete-post-form-{{ post.id }}" method="POST" action="{{ url_for('main.delete_post', post_id=post.id) }}" class="mr-4">
+                <button type="button" class="text-red-500 hover:text-red-700 transition-colors duration-200" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-form-id="delete-post-form-{{ post.id }}">
+                    <i class="fas fa-trash-alt mr-1"></i> 删除
+                </button>
+            </form>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <form method="POST" action="{{ url_for('main.toggle_sticky', post_id=post.id) }}" class="mr-4">
+                <button type="submit" class="text-orange-500 hover:text-orange-700 transition-colors duration-200">
+                    {% if post.is_sticky %}取消置顶{% else %}置顶{% endif %}
+                </button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-primary hover:underline">查看详情</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- 删除从这里开始的所有硬编码button元素 -->
+<!-- 分页 -->
+<div class="flex justify-center mt-12">
+    <nav class="inline-flex rounded-md shadow">
+        <a href="#" class="py-2 px-4 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-l-md">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-primary text-sm font-medium text-white">1</a>
+        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
+        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
+        <span class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</a>
+        <a href="#" class="py-2 px-4 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-r-md">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </nav>
+</div>
+{% extends "base.html" %}
+
+{% block title %}班级论坛{% endblock %}
+
+{# 确保下面是唯一的content块定义 #}
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <!-- 论坛内容 -->
+    </div>
+{% endblock %}
+
+{# 删除下面这段重复的content块定义 #}
+{% block content %}
+    <!-- 重复的内容 -->
+{% endblock %}
+{% block extra_css %}
+<style>
+    .post-card {
+        border-left: 4px solid #4F46E5;
+        transition: all 0.3s ease;
+    }
+    .post-card:hover {
+        border-left-width: 6px;
+    }
+    .active-tab {
+        background: #4F46E5;
+        color: white;
+    }
+</style>
+{% endblock %}

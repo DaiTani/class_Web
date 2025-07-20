@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">个人资料</h5>
+    <h6 class="card-subtitle mb-2 text-muted">{{ current_user.name }}</h6>
+    <p class="card-text">邮箱: {{ current_user.email }}</p>
+    <p class="card-text">注册时间: {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+    <a href="{{ url_for('auth.edit_profile') }}" class="card-link">编辑资料</a>
+    <a href="{{ url_for('auth.logout') }}" class="card-link">退出登录</a>
+  </div>
+</div>
+{% endblock %}
