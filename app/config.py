@@ -7,12 +7,16 @@ load_dotenv()
 # 确保此文件只包含以下内容
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
+    # 添加时区偏移配置（UTC+8）
+    TIMEZONE_OFFSET = 8  # 中国标准时间
     # 添加CSRF保护显式配置
     CSRF_HEADER_NAME = 'X-CSRFToken'
     CSRF_FIELD_NAME = 'csrf_token'
     CSRF_COOKIE_SECURE = False  # 开发环境设为False，生产环境需设为True
     CSRF_COOKIE_HTTPONLY = False
     CSRF_COOKIE_SAMESITE = 'Lax'
+    # 设置100MB上传限制
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
     # 合并数据库连接配置
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 10,
@@ -39,6 +43,14 @@ class Config:
     AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY', '')
     AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY', '')
     S3_BUCKET = os.getenv('S3_BUCKET', '')
+    
+    # 添加缓存配置
+    CACHE_TYPE = 'SimpleCache'
+    CACHE_DEFAULT_TIMEOUT = 300  # 5分钟缓存
+    CACHE_THRESHOLD = 1000
+    
+    # 静态文件缓存控制
+    SEND_FILE_MAX_AGE_DEFAULT = 3600  # 1小时
 
 # 以下为可选配置（根据需要保留）
 class DevelopmentConfig(Config):

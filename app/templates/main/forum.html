@@ -34,6 +34,47 @@
     {% endfor %}
 </div>
 
+<!-- 排序选项 -->
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-gray-800">帖子列表</h2>
+    <div class="relative">
+        <select id="sort-select" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary transition duration-200 shadow-sm">
+            <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>最新发布</option>
+            <option value="view_count" {% if sort_by == 'view_count' %}selected{% endif %}>最多浏览</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <i class="fas fa-chevron-down text-xs"></i>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 排序下拉菜单美化 */
+#sort-select {
+    background-image: none !important; /* 移除默认箭头 */
+}
+
+/* 添加悬停效果 */
+#sort-select:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* 选中状态样式 */
+#sort-select:focus {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+</style>
+<script>
+// 排序选择事件处理
+document.getElementById('sort-select').addEventListener('change', function() {
+    const sortBy = this.value;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort_by', sortBy);
+    window.location.search = urlParams.toString();
+});
+</script>
+
 <!-- 话题列表 -->
 <div class="bg-white p-6 rounded-lg shadow-sm mb-8">
     <h2 class="text-xl font-bold text-gray-800 mb-4">发布新话题</h2>
@@ -51,13 +92,6 @@
                     <option value="{{ category }}">{{ category }}</option>
                     {% endfor %}
                 {% endif %}
-                <!-- 添加固定分类选项 -->
-                <option value="学习交流">学习交流</option>
-                <option value="资源共享">资源共享</option>
-                <option value="活动组织">活动组织</option>
-                <option value="问题求助">问题求助</option>
-                <option value="创意分享">创意分享</option>
-                <option value="other">其他</option>
             </select>
         </div>
         <div class="mb-4">
@@ -74,10 +108,13 @@
     {% for post in posts %}
     <div class="bg-white p-6 rounded-lg shadow-sm {% if post.is_sticky %}border-l-4 border-red-500{% endif %}">
         <div class="flex items-center mb-4">
-            <img src="https://picsum.photos/id/{{ post.author_id }}/40/40" alt="用户头像" class="w-10 h-10 rounded-full mr-3">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3C/svg%3E" 
+                 data-src="https://picsum.photos/id/{{ post.author_id }}/40/40" 
+                 alt="用户头像" class="w-10 h-10 rounded-full mr-3 lazyload"
+                 onload="this.classList.add('loaded')"/>
             <div>
                 <div class="font-medium text-gray-800">{{ post.author.name }}</div>
-                <div class="text-gray-500 text-sm">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                <div class="text-gray-500 text-sm">{{ post.local_created_at.strftime('%Y-%m-%d %H:%M') }}</div>
             </div>
             {% if post.is_sticky %}
             <span class="ml-4 bg-red-500 text-white text-xs px-2 py-1 rounded flex items-center">
@@ -170,8 +207,39 @@
         </div>
     </div>
     <!-- 帖子列表结束 -->
-
     {% endfor %}
+    
+    <!-- 分页控件 -->
+    {% if pagination.pages > 1 %}
+    <nav class="flex justify-center mt-10">
+        <ul class="inline-flex items-center -space-x-px">
+            <li>
+                <a href="{{ url_for('main.forum', page=pagination.prev_num, category=selected_category, sort_by=sort_by) if pagination.has_prev else '#' }}" 
+                   class="block px-3 py-2 ml-0 leading-tight rounded-l-lg border {% if not pagination.has_prev %}text-gray-400 bg-gray-100 cursor-not-allowed{% else %}text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <li>
+                        <a href="{{ url_for('main.forum', page=page_num, category=selected_category, sort_by=sort_by) }}" 
+                           class="px-3 py-2 leading-tight border {% if page_num == pagination.page %}text-primary bg-blue-50 border-primary{% else %}text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700{% endif %}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li><span class="px-3 py-2 leading-tight border text-gray-400 bg-white border-gray-300">...</span></li>
+                {% endif %}
+            {% endfor %}
+            <li>
+                <a href="{{ url_for('main.forum', page=pagination.next_num, category=selected_category, sort_by=sort_by) if pagination.has_next else '#' }}" 
+                   class="block px-3 py-2 leading-tight rounded-r-lg border {% if not pagination.has_next %}text-gray-400 bg-gray-100 cursor-not-allowed{% else %}text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
     
     <style>
         .post-card {
@@ -188,4 +256,3 @@
     </style>
     
 {% endblock %}
-</div>

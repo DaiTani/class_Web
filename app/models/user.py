@@ -6,7 +6,13 @@ from datetime import datetime  # 正确导入datetime类
 # 添加帖子模型
 class Post(db.Model):
     __tablename__ = 'post'
-    __table_args__ = {'extend_existing': True}  # 必须添加此行
+    __table_args__ = (
+        db.Index('idx_post_category', 'category'),
+        db.Index('idx_post_created_at', 'created_at'),
+        db.Index('idx_post_view_count', 'view_count'),
+        db.Index('idx_post_is_sticky', 'is_sticky'),
+        {'extend_existing': True}
+    )
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
@@ -19,11 +25,26 @@ class Post(db.Model):
     category = db.Column(db.String(50), nullable=False, default='default')  # 帖子分类
     is_sticky = db.Column(db.Boolean, default=False)  # 是否置顶
     view_count = db.Column(db.Integer, default=0)  # 浏览量
+    
+    @property
+    def local_created_at(self):
+        """将UTC时间转换为本地时间（根据配置的时区偏移）"""
+        from datetime import timezone, timedelta
+        from flask import current_app
+        tz_offset = current_app.config.get('TIMEZONE_OFFSET', 8)
+        # 先将naive的UTC时间转换为aware的UTC时间
+        utc_aware = self.created_at.replace(tzinfo=timezone.utc)
+        # 再转换到目标时区
+        return utc_aware.astimezone(timezone(timedelta(hours=tz_offset)))
 
 # 添加评论模型
 class Comment(db.Model):
     __tablename__ = 'comment'
-    __table_args__ = {'extend_existing': True}  # 必须添加此行
+    __table_args__ = (
+        db.Index('idx_comment_post_id', 'post_id'),
+        db.Index('idx_comment_created_at', 'created_at'),
+        {'extend_existing': True}
+    )
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -32,18 +53,29 @@ class Comment(db.Model):
     post = db.relationship('Post', backref=db.backref('comments', lazy=True))
     author = db.relationship('User', backref=db.backref('comments', lazy=True))
     like_count = db.Column(db.Integer, default=0)  # 确保已添加点赞数字段
+    
+    @property
+    def local_created_at(self):
+        """将UTC时间转换为本地时间（根据配置的时区偏移）"""
+        from datetime import timezone, timedelta
+        from flask import current_app
+        tz_offset = current_app.config.get('TIMEZONE_OFFSET', 8)
+        # 先将naive的UTC时间转换为aware的UTC时间
+        utc_aware = self.created_at.replace(tzinfo=timezone.utc)
+        # 再转换到目标时区
+        return utc_aware.astimezone(timezone(timedelta(hours=tz_offset)))
 
 # 添加点赞模型
 class Like(db.Model):  # 新增的Like模型也需要添加
     __tablename__ = 'like'
-    __table_args__ = {'extend_existing': True}  # Must add this line
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
-    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    # 缺少级联删除配置
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id', ondelete='CASCADE'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Ensure unique constraints are added
     __table_args__ = (
         db.UniqueConstraint('user_id', 'post_id', name='unique_user_post_like'),
         db.UniqueConstraint('user_id', 'comment_id', name='unique_user_comment_like'),

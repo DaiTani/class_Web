@@ -26,6 +26,9 @@
                 <a href="{{ url_for('main.memories') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-3">
                     <i class="fas fa-arrow-left mr-1"></i> 返回
                 </a>
+                <a href="{{ url_for('main.upload_photo', album_id=album.id) }}" class="bg-primary hover:bg-indigo-700 text-white px-4 py-2 rounded mr-3">
+                    <i class="fas fa-upload mr-1"></i> 上传图片
+                </a>
                 {% if current_user.is_authenticated and current_user.is_admin %}
                 <button onclick="confirmDeleteAlbum('{{ album.id }}', '{{ album.title }}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
                     <i class="fas fa-trash-alt mr-1"></i> 删除相册

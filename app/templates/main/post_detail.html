@@ -13,25 +13,25 @@
     <div class="mb-8 border-b pb-4 bg-white rounded-xl shadow-sm p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ post.title }}</h1>
         <p class="text-gray-600 mb-4">发布者: {{ post.author.name }}</p>
-        <div class="flex flex-wrap items-center text-gray-500 text-sm gap-4 mb-2">
+        <div class="flex items-center text-gray-500 text-sm gap-4 mb-2">
             <div class="flex items-center">
                 <img src="https://picsum.photos/id/{{ post.author_id }}/32/32" alt="用户头像" class="w-6 h-6 rounded-full mr-2">
                 <span>{{ post.author.name }}</span>
             </div>
-            <span class="flex items-center"><i class="far fa-clock mr-1"></i> {{ post.created_at.strftime('%Y-%m-%d') }}</span>
+            <span class="flex items-center"><i class="far fa-clock mr-1"></i> {{ post.local_created_at.strftime('%Y-%m-%d') }}</span>
             <span class="flex items-center"><i class="far fa-eye mr-1"></i> {{ post.views }} 浏览</span>
             <span class="flex items-center"><i class="far fa-comment mr-1"></i> {{ post.comments|length }} 评论</span>
             <button id="post-like-btn-{{ post.id }}" class="like-btn text-gray-500 hover:text-blue-500 flex items-center ml-auto" data-post-id="{{ post.id }}">
                 <i class="fas fa-thumbs-up mr-1"></i> <span class="count">{{ post.like_count }}</span>
             </button>
-            {% if current_user.is_authenticated and current_user.id == post.author_id %}
-            <button id="delete-post-btn" class="text-red-500 hover:text-red-700 ml-2">
-                <i class="fas fa-trash-alt mr-1"></i> 删除帖子
-            </button>
-            {% endif %}
             <button id="toggle-sticky-btn" class="text-blue-500 hover:text-blue-700 ml-2">
                 <i class="fas fa-thumbtack mr-1"></i> {% if post.is_sticky %}取消置顶{% else %}置顶{% endif %}
             </button>
+            {% if current_user.is_authenticated and (current_user.id == post.author_id or current_user.is_admin) %}
+            <button id="delete-post-btn" class="text-red-500 hover:text-red-700 ml-2" data-post-id="{{ post.id }}">
+                <i class="fas fa-trash-alt mr-1"></i> 删除
+            </button>
+            {% endif %}
         </div>
     </div>
 
@@ -65,7 +65,7 @@
                 <div class="comment-author flex items-center mb-2">
                     <img src="https://picsum.photos/id/{{ comment.author_id }}/32/32" alt="用户头像" class="w-8 h-8 rounded-full mr-2 border-2 border-gray-100">
                     <span class="font-medium">{{ comment.author.name }}</span>
-                    <span class="text-gray-500 text-sm ml-2">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    <span class="text-gray-500 text-sm ml-2">{{ comment.local_created_at.strftime('%Y-%m-%d %H:%M') }}</span>
                 </div>
                 <div class="comment-content mb-2 bg-gray-50 p-3 rounded-lg">{{ comment.content }}</div>
                 <div class="comment-actions">
@@ -73,7 +73,7 @@
                         <i class="fas fa-thumbs-up mr-1"></i> <span class="count">{{ comment.like_count }}</span>
                     </button>
                     {% if current_user.is_authenticated and (current_user.id == comment.author_id or current_user.is_admin) %}
-                    <button class="delete-comment-btn text-red-500 hover:text-red-700 ml-4 text-sm">
+                    <button class="delete-comment-btn text-red-500 hover:text-red-700 ml-4 text-sm" data-bs-target="#deleteConfirmModal" data-comment-id="{{ comment.id }}">
                         <i class="fas fa-trash-alt mr-1"></i> 删除
                     </button>
                     {% endif %}
@@ -263,7 +263,7 @@
                         if (!response.ok) throw new Error('删除失败');
 
                         // 删除成功后重定向到帖子列表页
-                        window.location.href = '/posts';
+                        window.location.href = '/forum';
                     } catch (error) {
                         console.error('删除帖子失败:', error);
                         alert('删除操作失败，请重试');
@@ -273,7 +273,7 @@
                     }
                 });
             }
-
+            // 删除帖子异步删除功能的内联实现
             // 添加帖子置顶/取消置顶功能
             const toggleStickyBtn = document.getElementById('toggle-sticky-btn');
             if (toggleStickyBtn) {
@@ -361,4 +361,6 @@
         });
     </script>
 </div>
+
+</body>
 {% endblock %}

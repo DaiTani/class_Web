@@ -32,24 +32,38 @@ def index():
 
 @main.route('/forum')
 def forum():
+    # 获取分页参数，默认为第1页，每页10条
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    
     # 获取分类筛选参数
     selected_category = request.args.get('category', 'all')
+    # 获取排序参数，默认为按时间排序
+    sort_by = request.args.get('sort_by', 'created_at')
     
     # 分离置顶帖子和普通帖子查询
     sticky_posts = Post.query.filter_by(is_sticky=True)
-    regular_posts = Post.query.filter_by(is_sticky=False)
+    regular_posts_query = Post.query.filter_by(is_sticky=False)
     
-    # 应用分类筛选（如果选择了特定分类）
+    # 应用分类筛选
     if selected_category != 'all':
         sticky_posts = sticky_posts.filter_by(category=selected_category)
-        regular_posts = regular_posts.filter_by(category=selected_category)
+        regular_posts_query = regular_posts_query.filter_by(category=selected_category)
     
-    # 排序：置顶帖按更新时间降序，普通帖按创建时间降序
+    # 排序：置顶帖按更新时间降序
     sticky_posts = sticky_posts.order_by(Post.updated_at.desc()).all()
-    regular_posts = regular_posts.order_by(Post.created_at.desc()).all()
     
-    # 合并结果：置顶帖在前，普通帖在后
-    posts = sticky_posts + regular_posts
+    # 根据参数对普通帖进行排序
+    if sort_by == 'view_count':
+        regular_posts_query = regular_posts_query.order_by(Post.view_count.desc())
+    else:
+        regular_posts_query = regular_posts_query.order_by(Post.created_at.desc())
+    
+    # 应用分页
+    regular_posts_paginated = regular_posts_query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    # 合并结果：置顶帖在前，分页的普通帖在后
+    posts = sticky_posts + regular_posts_paginated.items
     
     # 获取所有可用分类（用于筛选下拉框）
     categories = db.session.query(Post.category).distinct().all()
@@ -61,7 +75,9 @@ def forum():
     return render_template('main/forum.html', 
                           posts=posts, 
                           selected_category=selected_category, 
-                          categories=categories)  # 传递分类数据
+                          categories=categories, 
+                          sort_by=sort_by, 
+                          pagination=regular_posts_paginated)  # 传递分页对象
 
 @main.route('/memories')
 def memories():
@@ -145,22 +161,34 @@ def post_detail(post_id):
 @main.route('/create_post', methods=['POST'])
 @login_required
 def create_post():
+    # 1. 验证权限
+    if not current_user.is_authenticated:
+        flash('请先登录', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    # 2. 获取表单数据
     title = request.form.get('title')
     content = request.form.get('content')
-    # 获取分类参数（默认为'default'）
     category = request.form.get('category', 'default')
     
+    # 3. 验证数据
     if not title or not content:
         flash('标题和内容不能为空', 'danger')
         return redirect(url_for('main.forum'))
     
-    # 创建帖子时包含分类信息
-    post = Post(title=title, content=content, 
-               author_id=current_user.id, category=category)
-    db.session.add(post)
-    db.session.commit()
+    # 4. 业务逻辑处理
+    try:
+        post = Post(title=title, content=content, 
+                   author_id=current_user.id, category=category)
+        db.session.add(post)
+        db.session.commit()
+        flash('帖子发布成功', 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'发布帖子失败: {str(e)}')
+        flash(f'发布帖子失败: {str(e)}', 'danger')
     
-    flash('帖子发布成功', 'success')
+    # 5. 确保返回响应
     return redirect(url_for('main.forum'))
 
 @main.route('/post/<int:post_id>/comment', methods=['POST'])
@@ -185,20 +213,28 @@ def delete_post(post_id):
         flash('没有权限删除此帖子', 'danger')
         return redirect(url_for('main.forum'))
     
-    # 先删除帖子相关评论的点赞
-    Like.query.filter(Like.comment_id.in_(
-        db.session.query(Comment.id).filter_by(post_id=post_id)
-    )).delete(synchronize_session=False)
-    
-    # 再删除帖子相关评论
-    Comment.query.filter_by(post_id=post_id).delete()
-    
-    # 最后删除帖子
-    db.session.delete(post)
-    db.session.commit()
-    
-    flash('帖子已成功删除', 'success')
-    return redirect(url_for('main.forum'))
+    try:
+        # 先删除帖子的直接点赞
+        Like.query.filter_by(post_id=post_id).delete(synchronize_session=False)
+        
+        # 再删除帖子相关评论的点赞
+        Like.query.filter(Like.comment_id.in_(
+            db.session.query(Comment.id).filter_by(post_id=post_id)
+        )).delete(synchronize_session=False)
+        
+        # 再删除帖子相关评论
+        Comment.query.filter_by(post_id=post_id).delete()
+        
+        # 最后删除帖子
+        db.session.delete(post)
+        db.session.commit()
+        flash('帖子已成功删除', 'success')
+        return redirect(url_for('main.forum'))
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'删除帖子失败: {str(e)}')
+        flash(f'删除失败: {str(e)}', 'danger')
+        return redirect(url_for('main.post_detail', post_id=post_id))
 
 @main.route('/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
@@ -337,6 +373,36 @@ def add_category():
     if not current_user.is_admin:
         flash('只有管理员可以添加分类', 'danger')
         return redirect(url_for('main.forum'))
+    
+    # 获取表单提交的分类名称
+    category_name = request.form.get('category_name', '').strip()
+    
+    # 验证分类名称
+    if not category_name:
+        flash('分类名称不能为空', 'danger')
+        return redirect(url_for('main.manage_categories'))
+    
+    # 检查分类是否已存在
+    existing_category = db.session.query(Post.category).filter_by(category=category_name).first()
+    if existing_category:
+        flash('该分类已存在', 'danger')
+        return redirect(url_for('main.manage_categories'))
+    
+    # 添加新分类（通过创建一个临时帖子来初始化分类，或直接使用分类表）
+    # 注意：这里假设使用Post模型的category字段作为分类存储
+    # 如果有专门的Category模型，应该使用该模型添加
+    temp_post = Post(
+        title=f'初始化分类: {category_name}',
+        content='此帖子用于初始化分类，可安全删除',
+        author_id=current_user.id,
+        category=category_name,
+        is_sticky=False
+    )
+    db.session.add(temp_post)
+    db.session.commit()
+    
+    flash('分类添加成功', 'success')
+    return redirect(url_for('main.manage_categories'))
 
 # 公告管理路由
 @main.route('/admin/announcements')
@@ -441,6 +507,46 @@ def album_detail(album_id):
     form.target_album_id.choices = [(a.id, a.title) for a in all_albums if a.id != album_id]
     return render_template('main/album_detail.html', album=album, all_albums=all_albums, form=form)
 
+# 添加照片上传路由
+from flask_wtf import FlaskForm
+from wtforms import FileField, StringField, SubmitField
+from wtforms.validators import DataRequired
+
+# 添加照片上传表单
+class PhotoUploadForm(FlaskForm):
+    photo = FileField('照片', validators=[DataRequired()])
+    caption = StringField('照片描述')
+    submit = SubmitField('上传照片')
+
+# 添加照片上传路由
+@main.route('/memories/album/<int:album_id>/upload', methods=['GET', 'POST'])
+@login_required
+def upload_photo(album_id):
+    album = Album.query.get_or_404(album_id)
+    form = PhotoUploadForm()  # 初始化表单
+    
+    if form.validate_on_submit():
+        file = form.photo.data
+        caption = form.caption.data
+        
+        if file and allowed_file(file.filename):
+            s3_url = upload_to_s3(file, album_id)
+            if s3_url:
+                photo = Photo(
+                    album_id=album.id,
+                    s3_url=s3_url,
+                    filename=secure_filename(file.filename),
+                    caption=caption
+                )
+                db.session.add(photo)
+                db.session.commit()
+                flash('照片上传成功', 'success')
+                return redirect(url_for('main.album_detail', album_id=album.id))
+            else:
+                flash('照片上传失败，请检查文件格式', 'danger')
+    
+    return render_template('main/upload_photo.html', album=album, form=form)  # 传递表单实例
+
 # 添加删除相册路由
 @main.route('/admin/albums/delete/<int:album_id>', methods=['POST'])
 @login_required
@@ -451,22 +557,26 @@ def delete_album(album_id):
 
     album = Album.query.get_or_404(album_id)
     
-    # 删除相册中的所有照片
-    for photo in album.photos:
-        # 从S3删除照片 - 忽略删除结果，因为文件可能已手动删除
-        try:
-            delete_from_s3(photo.s3_url)
-        except Exception as e:
-            logger.warning(f"忽略S3删除错误: {str(e)}")
-        # 从数据库删除照片记录
-        db.session.delete(photo)
+    try:
+        # 删除相册中的所有照片
+        for photo in album.photos:
+            # 从S3删除照片
+            try:
+                delete_from_s3(photo.s3_url)
+            except Exception as e:
+                logger.warning(f"忽略S3删除错误: {str(e)}")
+            db.session.delete(photo)
+        
+        # 删除相册
+        db.session.delete(album)
+        db.session.commit()
+        flash('相册已成功删除', 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'删除相册失败: {str(e)}')
+        flash(f'删除相册失败: {str(e)}', 'danger')
     
-    # 删除相册
-    db.session.delete(album)
-    db.session.commit()
-    
-    flash('相册已成功删除', 'success')
-    return redirect(url_for('main.memories'))
+    return redirect(url_for('main.memories'))  # 确保始终返回响应
 
 # 添加删除照片路由
 @main.route('/admin/photos/delete/<int:photo_id>', methods=['POST'])

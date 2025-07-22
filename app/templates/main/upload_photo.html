@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}上传照片 - {{ album.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">上传照片到相册: {{ album.title }}</h1>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}  <!-- 移除if判断，确保CSRF令牌始终存在 -->
+            
+            <div class="mb-4">
+                {{ form.photo.label(class="block text-gray-700 mb-2") }}
+                {{ form.photo(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary") }}
+                {% for error in form.photo.errors %}
+                    <span class="text-red-500 text-sm">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-6">
+                {{ form.caption.label(class="block text-gray-700 mb-2") }}
+                {{ form.caption(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary", rows=3) }}
+            </div>
+            
+            <div class="flex space-x-4">
+                {{ form.submit(class="bg-primary hover:bg-indigo-700 text-white px-6 py-2 rounded-md") }}
+                <a href="{{ url_for('main.album_detail', album_id=album.id) }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md">
+                    <i class="fas fa-arrow-left mr-2"></i> 返回相册
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -151,7 +151,10 @@
 
     <!-- 添加Bootstrap JS和Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+        <!-- 添加删除功能脚本 -->
+        <script src="{{ url_for('static', filename='js/delete_post.js') }}"></script>
+    {% endblock %}
     <script>
         // 移动端菜单切换功能
         document.addEventListener('DOMContentLoaded', function() {
@@ -166,5 +169,56 @@
             }
         });
     </script>
-</body>
-</html>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalTitle">确认删除</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="deleteModalMessage">确定要删除此内容吗？此操作不可恢复。</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-danger" id="confirm-delete">确认删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 确保在其他模板中没有重复的#deleteConfirmModal定义 -->
+    </body>
+    </html>
+    <script>
+    // 移动端菜单切换功能
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+    
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                // 切换菜单显示状态
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    });
+    </script>
+
+    <!-- 自动为所有POST表单添加CSRF令牌
+    const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+    document.querySelectorAll('form[method="POST"]').forEach(form => {
+        // 如果表单没有CSRF令牌字段，则添加
+        if (!form.querySelector('input[name="csrf_token"]')) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrf_token';
+            input.value = csrfToken;
+            form.appendChild(input);
+        }
+    });
+    </script>
+    </body>
+    </html>

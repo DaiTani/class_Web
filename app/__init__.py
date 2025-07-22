@@ -2,8 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
-# 恢复CSRF导入
 from flask_wtf.csrf import CSRFProtect
+from flask_compress import Compress  # 导入压缩扩展
 from app.config import Config
 
 # 从独立模块导入db
@@ -20,7 +20,10 @@ login_manager.login_view = 'auth.login'
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-
+    
+    # 初始化压缩扩展
+    Compress(app)
+    
     # 绑定扩展到应用
     db.init_app(app)
     migrate.init_app(app, db)
