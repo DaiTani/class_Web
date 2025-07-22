@@ -190,35 +190,19 @@
     </div>
 
     <!-- 确保在其他模板中没有重复的#deleteConfirmModal定义 -->
-    </body>
-    </html>
+    <!-- 自动为所有POST表单添加CSRF令牌 -->
     <script>
-    // 移动端菜单切换功能
-    document.addEventListener('DOMContentLoaded', function() {
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-    
-        if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', function() {
-                // 切换菜单显示状态
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
-    });
+        const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+        document.querySelectorAll('form[method="POST"]').forEach(form => {
+            // 如果表单没有CSRF令牌字段，则添加
+            if (!form.querySelector('input[name="csrf_token"]')) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_token';
+                input.value = csrfToken;
+                form.appendChild(input);
+            }
+        });
     </script>
-
-    <!-- 自动为所有POST表单添加CSRF令牌
-    const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
-    document.querySelectorAll('form[method="POST"]').forEach(form => {
-        // 如果表单没有CSRF令牌字段，则添加
-        if (!form.querySelector('input[name="csrf_token"]')) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'csrf_token';
-            input.value = csrfToken;
-            form.appendChild(input);
-        }
-    });
-    </script>
-    </body>
-    </html>
+</body>
+</html>
