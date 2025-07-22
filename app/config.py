@@ -29,9 +29,9 @@ class Config:
         # 'timeout': 10,  # 注释掉或删除这一行
     }
     # 添加 S3 区域配置
-    S3_REGION = os.getenv('S3_REGION', 'us-east-1')  # 提供默认区域值
-    S3_KEY = os.getenv('S3_KEY', '')
-    S3_SECRET = os.getenv('S3_SECRET', '')
+    S3_REGION = os.getenv('S3_REGION', 'eu-north-1')  # 提供默认区域值
+    AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY', '')
+    AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY', '')
     S3_BUCKET = os.getenv('S3_BUCKET', '')
 
 # 以下为可选配置（根据需要保留）

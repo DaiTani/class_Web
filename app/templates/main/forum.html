@@ -9,11 +9,6 @@
         <p class="text-gray-600">学习交流、资源共享、活动组织的班级社区</p>
     </div>
     {% if current_user.is_authenticated %}
-        <!-- 移除以下冗余按钮 -->
-        <!-- <button onclick="location.href='{{ url_for('main.create_post') }}'" class="mt-4 md:mt-0 px-5 py-3 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center">
-        <!--     <i class="fas fa-plus mr-2"></i> 发布新话题
-        <!-- </button> -->
-        
         <!-- 管理员分类管理链接 -->
         {% if current_user.is_admin %}
         <a href="{{ url_for('main.manage_categories') }}" class="mt-4 md:mt-0 ml-2 px-5 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition flex items-center">
@@ -113,52 +108,23 @@
             <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-primary hover:underline">查看详情</a>
         </div>
     </div>
+    <!-- 帖子列表结束 -->
+
     {% endfor %}
+    
+    <style>
+        .post-card {
+            border-left: 4px solid #4F46E5;
+            transition: all 0.3s ease;
+        }
+        .post-card:hover {
+            border-left-width: 6px;
+        }
+        .active-tab {
+            background: #4F46E5;
+            color: white;
+        }
+    </style>
+    
+{% endblock %}
 </div>
-<!-- 删除从这里开始的所有硬编码button元素 -->
-<!-- 分页 -->
-<div class="flex justify-center mt-12">
-    <nav class="inline-flex rounded-md shadow">
-        <a href="#" class="py-2 px-4 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-l-md">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-primary text-sm font-medium text-white">1</a>
-        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
-        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
-        <span class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
-        <a href="#" class="py-2 px-4 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</a>
-        <a href="#" class="py-2 px-4 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-r-md">
-            <i class="fas fa-chevron-right"></i>
-        </a>
-    </nav>
-</div>
-{% extends "base.html" %}
-
-{% block title %}班级论坛{% endblock %}
-
-{# 确保下面是唯一的content块定义 #}
-{% block content %}
-    <div class="container mx-auto px-4 py-8">
-        <!-- 论坛内容 -->
-    </div>
-{% endblock %}
-
-{# 删除下面这段重复的content块定义 #}
-{% block content %}
-    <!-- 重复的内容 -->
-{% endblock %}
-{% block extra_css %}
-<style>
-    .post-card {
-        border-left: 4px solid #4F46E5;
-        transition: all 0.3s ease;
-    }
-    .post-card:hover {
-        border-left-width: 6px;
-    }
-    .active-tab {
-        background: #4F46E5;
-        color: white;
-    }
-</style>
-{% endblock %}

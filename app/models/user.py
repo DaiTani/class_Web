@@ -59,6 +59,29 @@ class Announcement(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     author = db.relationship('User', backref=db.backref('announcements', lazy=True))
 
+# 添加相册模型
+class Album(db.Model):
+    __tablename__ = 'album'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    author = db.relationship('User', backref=db.backref('albums', lazy=True))
+    photos = db.relationship('Photo', backref='album', lazy=True, cascade='all, delete-orphan')
+
+# 添加照片模型
+class Photo(db.Model):
+    __tablename__ = 'photo'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    album_id = db.Column(db.Integer, db.ForeignKey('album.id'), nullable=False)
+    s3_url = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(100), nullable=False)
+    caption = db.Column(db.Text)
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)

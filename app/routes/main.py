@@ -5,6 +5,10 @@ from app.models.user import Post, Comment, User, Like, db  # 添加Like导入
 from datetime import datetime  # 确保已导入datetime
 from app.models.user import User, Announcement  
 from app import db
+from app.models.user import db, Post, Comment, Like, Announcement, User, Album, Photo  # 添加Album和Photo
+from app.utils.s3_upload import upload_to_s3  # 导入S3上传函数
+import os
+from werkzeug.utils import secure_filename
 
 main = Blueprint('main', __name__)
 
@@ -51,7 +55,59 @@ def forum():
 
 @main.route('/memories')
 def memories():
-    return render_template('main/memories.html')
+    # 获取所有相册
+    albums = Album.query.order_by(Album.created_at.desc()).all()
+    return render_template('main/memories.html', albums=albums)
+
+@main.route('/memories/create_album', methods=['GET', 'POST'])
+@login_required
+def create_album():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        files = request.files.getlist('photos')
+
+        if not title or not files or all(f.filename == '' for f in files):
+            flash('标题和照片不能为空', 'danger')
+            return redirect(url_for('main.memories'))
+
+        # 创建相册
+        album = Album(
+            title=title,
+            description=description,
+            author_id=current_user.id
+        )
+        db.session.add(album)
+        db.session.flush()  # 获取album.id但不提交事务
+
+        # 上传照片到S3并保存到数据库
+        for file in files:
+            if file and allowed_file(file.filename):
+                s3_url = upload_to_s3(file, album.id)
+                if s3_url:
+                    photo = Photo(
+                        album_id=album.id,
+                        s3_url=s3_url,
+                        filename=secure_filename(file.filename),
+                        caption=request.form.get(f'caption_{file.filename}', '')
+                    )
+                    db.session.add(photo)
+                else:
+                    flash('照片上传失败，请检查AWS S3配置', 'danger')
+                    db.session.rollback()
+                    return redirect(url_for('main.memories'))
+
+        db.session.commit()
+        flash('相册创建成功', 'success')
+        return redirect(url_for('main.memories'))
+
+    return render_template('main/create_album.html')
+
+# 添加允许的文件类型检查
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @main.route('/about')
 def about():
@@ -345,3 +401,75 @@ def delete_category(category):
     flash(f'分类 "{category}" 已删除', 'success')
     return redirect(url_for('main.manage_categories'))
 # 分类管理路由 - 结束
+
+# 添加相册详情路由
+@main.route('/memories/album/<int:album_id>')
+def album_detail(album_id):
+    album = Album.query.get_or_404(album_id)
+    all_albums = Album.query.all()
+    return render_template('main/album_detail.html', album=album, all_albums=all_albums)
+
+# 添加删除相册路由
+@main.route('/admin/albums/delete/<int:album_id>', methods=['POST'])
+@login_required
+def delete_album(album_id):
+    if not current_user.is_admin:
+        flash('只有管理员可以删除相册', 'danger')
+        return redirect(url_for('main.memories'))
+
+    album = Album.query.get_or_404(album_id)
+    
+    # 删除相册中的所有照片
+    for photo in album.photos:
+        # 从S3删除照片
+        delete_from_s3(photo.s3_url)
+        # 从数据库删除照片记录
+        db.session.delete(photo)
+    
+    # 删除相册
+    db.session.delete(album)
+    db.session.commit()
+    
+    flash('相册已成功删除', 'success')
+    return redirect(url_for('main.memories'))
+
+# 添加删除照片路由
+@main.route('/admin/photos/delete/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_photo(photo_id):
+    if not current_user.is_admin:
+        flash('只有管理员可以删除照片', 'danger')
+        return jsonify({'status': 'error', 'message': '权限不足'}), 403
+
+    photo = Photo.query.get_or_404(photo_id)
+    album_id = photo.album_id
+    
+    # 从S3删除照片
+    if delete_from_s3(photo.s3_url):
+        # 从数据库删除照片记录
+        db.session.delete(photo)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error', 'message': '删除S3文件失败'}), 500
+
+# 添加移动照片路由
+@main.route('/admin/photos/move', methods=['POST'])
+@login_required
+def move_photo():
+    if not current_user.is_admin:
+        flash('只有管理员可以移动照片', 'danger')
+        return redirect(url_for('main.memories'))
+
+    photo_id = request.form.get('photo_id')
+    target_album_id = request.form.get('target_album_id')
+    
+    photo = Photo.query.get_or_404(photo_id)
+    target_album = Album.query.get_or_404(target_album_id)
+    
+    # 更新照片的相册ID
+    photo.album_id = target_album_id
+    db.session.commit()
+    
+    flash('照片已成功移动到相册《{}》'.format(target_album.title), 'success')
+    return redirect(url_for('main.album_detail', album_id=photo.album_id))

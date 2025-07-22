@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ album.title }} - 班级回忆录{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- 相册标题和操作区 -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{ album.title }}</h1>
+            <p class="text-gray-600 mt-2">{{ album.description }}</p>
+            <p class="text-sm text-gray-500 mt-1">{{ album.created_at.strftime('%Y年%m月%d日') }} 创建 · {{ album.photos|length }}张照片</p>
+        </div>
+        {% if current_user.is_admin %}
+        <div class="flex gap-3">
+            <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition" 
+                    onclick="confirmDeleteAlbum({{ album.id }})">
+                <i class="fas fa-trash mr-1"></i> 删除相册
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 照片网格 -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-12">
+        {% for photo in album.photos %}
+        <div class="relative group" data-photo-id="{{ photo.id }}">
+            <img src="{{ photo.s3_url }}" alt="相册照片" class="w-full h-40 object-cover rounded-lg shadow-md">
+            {% if current_user.is_admin %}
+            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-gray-100" 
+                        onclick="confirmDeletePhoto({{ photo.id }}, event)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 hover:bg-gray-100" 
+                        onclick="openMovePhotoModal({{ photo.id }}, event)">
+                    <i class="fas fa-arrows-alt"></i>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 移动照片模态框 -->
+<div class="modal fade" id="movePhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">移动照片到相册</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="movePhotoForm" method="POST" action="{{ url_for('main.move_photo') }}">
+                    <input type="hidden" id="photoId" name="photo_id">
+                    <div class="mb-3">
+                        <label class="form-label">目标相册</label>
+                        <select class="form-select" name="target_album_id" required>
+                            {% for a in all_albums %}
+                            {% if a.id != album.id %}
+                            <option value="{{ a.id }}">{{ a.title }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">移动</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 删除照片确认
+function confirmDeletePhoto(photoId, event) {
+    event.stopPropagation();
+    if (confirm('确定要删除这张照片吗？此操作不可恢复。')) {
+        fetch(`{{ url_for('main.delete_photo', photo_id=0) }}${photoId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('删除失败，请重试');
+            }
+        });
+    }
+}
+
+// 删除相册确认
+function confirmDeleteAlbum(albumId) {
+    if (confirm('确定要删除这个相册吗？所有照片将被永久删除。')) {
+        fetch(`{{ url_for('main.delete_album', album_id=0) }}${albumId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '{{ url_for('main.memories') }}';
+            } else {
+                alert('删除失败，请重试');
+            }
+        });
+    }
+}
+
+// 打开移动照片模态框
+function openMovePhotoModal(photoId, event) {
+    event.stopPropagation();
+    document.getElementById('photoId').value = photoId;
+    var moveModal = new bootstrap.Modal(document.getElementById('movePhotoModal'));
+    moveModal.show();
+}
+
+// 获取CSRF Token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

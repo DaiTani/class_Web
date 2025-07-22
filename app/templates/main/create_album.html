@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}创建相册 - 班级回忆录{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-4">创建新相册</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-4">
+            <label for="title" class="block text-gray-700">相册标题</label>
+            <input type="text" id="title" name="title" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700">相册描述</label>
+            <textarea id="description" name="description" rows="3" class="w-full p-2 border rounded"></textarea>
+        </div>
+        <div class="mb-4">
+            <label for="photos" class="block text-gray-700">上传照片</label>
+            <input type="file" id="photos" name="photos" multiple accept="image/*" class="w-full p-2 border rounded" required>
+        </div>
+        <button type="submit" class="bg-secondary text-white px-4 py-2 rounded hover:bg-green-600">创建相册</button>
+        <a href="{{ url_for('main.memories') }}" class="ml-4 text-gray-600 hover:text-gray-800">取消</a>
+    </form>
+</div>
+{% endblock %}

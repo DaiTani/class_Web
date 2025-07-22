@@ -8,132 +8,75 @@
     <p class="text-xl text-gray-600 max-w-2xl mx-auto">珍藏班级点滴，记录美好瞬间，共同创建属于我们的青春纪念册</p>
 </div>
 
-<!-- 时间线导航 -->
-<div class="flex overflow-x-auto pb-4 mb-8">
-    <div class="flex space-x-3">
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow active-tab whitespace-nowrap">
-            <i class="fas fa-star mr-2 text-yellow-500"></i> 精选回忆
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            2024年
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            2023年
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            班级活动
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            学习时刻
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            生活日常
-        </button>
-        <button class="px-5 py-2 bg-white rounded-full font-medium shadow hover:bg-gray-50 whitespace-nowrap">
-            毕业纪念
-        </button>
-    </div>
-</div>
-
-<!-- 照片网格 -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
-    <!-- 照片1 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-camera text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">开学典礼</div>
-            <div class="text-xs opacity-80">2023.09.01 · 45张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片2 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-flask text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">实验室日常</div>
-            <div class="text-xs opacity-80">2023.10.15 · 28张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片3 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-utensils text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">班级聚餐</div>
-            <div class="text-xs opacity-80">2023.12.25 · 36张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片4 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-running text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">校运动会</div>
-            <div class="text-xs opacity-80">2024.04.10 · 52张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片5 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-tree text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">春游踏青</div>
-            <div class="text-xs opacity-80">2024.03.22 · 41张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片6 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-microscope text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">生物实验课</div>
-            <div class="text-xs opacity-80">2024.05.15 · 33张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片7 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-music text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">迎新晚会</div>
-            <div class="text-xs opacity-80">2023.09.30 · 48张照片</div>
-        </div>
-    </div>
-    
-    <!-- 照片8 -->
-    <div class="photo-card card aspect-square">
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-book-reader text-gray-400 text-3xl"></i>
-        </div>
-        <div class="photo-info">
-            <div class="text-sm font-semibold">期末复习</div>
-            <div class="text-xs opacity-80">2024.01.05 · 29张照片</div>
-        </div>
-    </div>
-</div>
-
-<!-- 上传照片按钮 -->
+<!-- 上传相册模态框按钮 -->
 {% if current_user.is_authenticated %}
-<div class="text-center mt-12">
-    <button class="px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-green-600 transition flex items-center mx-auto">
+<div class="text-center mb-8">
+    <button type="button" class="px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
         <i class="fas fa-upload mr-2"></i> 上传新相册
     </button>
 </div>
 {% endif %}
+
+<!-- 创建相册模态框 -->
+<div class="modal fade" id="createAlbumModal" tabindex="-1" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createAlbumModalLabel">创建新相册</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('main.create_album') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="albumTitle" class="form-label">相册标题</label>
+                        <input type="text" class="form-control" id="albumTitle" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="albumDescription" class="form-label">相册描述</label>
+                        <textarea class="form-control" id="albumDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">上传照片</label>
+                        <div id="dropArea" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-3 hover:bg-gray-50 transition cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600">拖放照片到此处，或 <span class="text-primary font-medium">点击选择文件</span></p>
+                            <input class="d-none" type="file" id="albumPhotos" name="photos" multiple accept="image/*" required>
+                        </div>
+                        <div class="form-text mb-3">支持JPG、PNG、GIF格式，最多上传10张照片</div>
+                        
+                        <!-- 文件预览区域 -->
+                        <div id="previewContainer" class="d-flex flex-wrap gap-3 mb-3"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">创建相册</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 时间线导航 -->
+<div class="flex overflow-x-auto pb-4 mb-8">
+    <!-- 时间线内容保持不变 -->
+</div>
+
+<!-- 照片网格 - 更新为动态显示 -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+    {% for album in albums %}
+    <a href="{{ url_for('main.album_detail', album_id=album.id) }}" class="photo-card card aspect-square">
+        {% if album.photos %}
+        <img src="{{ album.photos[0].s3_url }}" alt="{{ album.title }}" class="w-full h-full object-cover">
+        {% else %}
+        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
+            <i class="fas fa-camera text-gray-400 text-3xl"></i>
+        </div>
+        {% endif %}
+        <div class="photo-info">
+            <div class="text-sm font-semibold">{{ album.title }}</div>
+            <div class="text-xs opacity-80">{{ album.created_at.strftime('%Y.%m.%d') }} · {{ album.photos|length }}张照片</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
 {% endblock %}
 
 {% block extra_css %}
@@ -167,5 +110,169 @@
         background: #4F46E5;
         color: white;
     }
+    
+    /* 上传区域样式 */
+    #dropArea.drag-over {
+        border-color: #4F46E5;
+        background-color: rgba(79, 70, 229, 0.05);
+    }
+    
+    /* 预览图片样式 */
+    .preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .preview-remove {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        font-size: 16px;
+        color: #e53e3e;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .modal-dialog {
+            margin: 0.5rem;
+            max-width: none;
+        }
+        
+        .preview-item {
+            width: 80px;
+            height: 80px;
+        }
+    }
 </style>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+// 文件上传功能实现
+function initFileUpload() {
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('albumPhotos');
+    const previewContainer = document.getElementById('previewContainer');
+    const maxFiles = 10;
+    let selectedFiles = [];
+
+    if (!dropArea || !fileInput) {
+        console.error('文件上传元素未找到');
+        return;
+    }
+
+    // 点击区域触发文件选择 - 使用箭头函数确保this指向正确
+    dropArea.addEventListener('click', () => {
+        console.log('点击上传区域');
+        fileInput.click();
+    });
+
+    // 拖放功能 - 阻止默认行为
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // 添加/移除拖放状态样式
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+            dropArea.classList.add('drag-over');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+            dropArea.classList.remove('drag-over');
+        }, false);
+    });
+
+    // 处理拖放文件
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+    }
+
+    // 处理文件选择
+    fileInput.addEventListener('change', function() {
+        console.log('文件选择变化', this.files);
+        handleFiles(this.files);
+    });
+
+    // 处理选择的文件
+    function handleFiles(files) {
+        if (!files.length) return;
+        
+        // 检查文件数量
+        if (selectedFiles.length + files.length > maxFiles) {
+            alert(`最多只能上传${maxFiles}张照片`);
+            return;
+        }
+
+        // 添加新文件并显示预览
+        Array.from(files).forEach(file => {
+            if (!file.type.match('image.*')) {
+                alert('请仅选择图片文件');
+                return;
+            }
+            
+            selectedFiles.push(file);
+            addPreview(file);
+        });
+    }
+
+    // 添加文件预览
+    function addPreview(file) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'preview-item position-relative';
+            previewItem.innerHTML = `
+                <img src="${e.target.result}" class="preview-img">
+                <div class="preview-remove">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            previewContainer.appendChild(previewItem);
+
+            // 添加删除功能
+            const removeBtn = previewItem.querySelector('.preview-remove');
+            removeBtn.addEventListener('click', function() {
+                const index = selectedFiles.indexOf(file);
+                if (index > -1) {
+                    selectedFiles.splice(index, 1);
+                    previewItem.remove();
+                }
+            });
+        };
+        
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+    {% endblock %}
