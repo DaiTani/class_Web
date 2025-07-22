@@ -1,22 +1,32 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from app.models.user import Post, db
 from flask_login import login_required, current_user
+from flask import current_app
 from app.models.user import Post, Comment, User, Like, db  # 添加Like导入
-from datetime import datetime  # 确保已导入datetime
+from datetime import datetime, timedelta  # 确保已导入datetime
 from app.models.user import User, Announcement  
 from app import db
 from app.models.user import db, Post, Comment, Like, Announcement, User, Album, Photo  # 添加Album和Photo
-from app.utils.s3_upload import upload_to_s3  # 导入S3上传函数
+from app.utils.s3_upload import upload_to_s3, delete_from_s3  # 导入S3上传函数
 import os
 from werkzeug.utils import secure_filename
+from app import csrf
 
 main = Blueprint('main', __name__)
 
+# 添加用户活动跟踪钩子
+@main.before_app_request
+def update_last_seen():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
 @main.route('/')
 def index():
-    # 模拟在线用户数量
-    online_count = 12 if current_user.is_authenticated else 11
-    # 获取最新的两条公告
+    # 动态计算5分钟内活跃的用户数
+    online_count = User.query.filter(
+        User.last_seen >= datetime.utcnow() - timedelta(minutes=5)
+    ).count()
     announcements = Announcement.query.order_by(Announcement.timestamp.desc()).limit(2).all()
     return render_template('main/index.html', online_count=online_count, announcements=announcements)
 
@@ -115,7 +125,7 @@ def about():
     member_count = User.query.count()
     post_count = Post.query.count()
     # 注意：回忆照片和班级活动需要创建对应的模型后才能查询
-    photo_count = 0  # 临时值，需创建Photo模型
+    photo_count = Photo.query.count()  # 动态获取所有照片总数
     activity_count = 0  # 临时值，需创建Activity模型
     return render_template('main/about.html', 
                           member_count=member_count,
@@ -158,13 +168,11 @@ def create_post():
 def add_comment(post_id):
     post = Post.query.get_or_404(post_id)
     content = request.form.get('content')
-    
     if content:
-        comment = Comment(content=content, post_id=post_id, author_id=current_user.id)
+        comment = Comment(content=content, author=current_user, post=post)
         db.session.add(comment)
         db.session.commit()
-        flash('评论成功', 'success')
-    
+        flash('评论已发布!', 'success')
     return redirect(url_for('main.post_detail', post_id=post_id))
 
 @main.route('/post/<int:post_id>/delete', methods=['POST'])
@@ -268,11 +276,28 @@ def like_comment(comment_id):
 
 @main.route('/post/<int:post_id>/toggle_sticky', methods=['POST'])
 @login_required
+# 删除此处的导入语句
+# from flask_wtf.csrf import validate_csrf, ValidationError
+# from flask import current_app
 def toggle_sticky(post_id):
+    # 将导入移至函数内部
+    from flask_wtf.csrf import validate_csrf, ValidationError
+    from flask import current_app
+    
+    csrf_token_header = request.headers.get('X-CSRFToken')
+    csrf_token_form = request.form.get('csrf_token')
+    current_app.logger.info(f"CSRF调试: 头令牌={csrf_token_header}, 表单令牌={csrf_token_form}")
+    
+    try:
+        # 优先验证请求头令牌，其次验证表单令牌
+        validate_csrf(csrf_token_header or csrf_token_form)
+    except ValidationError as e:
+        current_app.logger.error(f"CSRF验证失败: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'CSRF令牌验证失败'}), 400
+    
     # 检查是否为管理员
     if not current_user.is_admin:
-        flash('只有管理员可以设置置顶帖子', 'danger')
-        return redirect(url_for('main.forum'))
+        return jsonify({'status': 'error', 'message': '只有管理员可以设置置顶帖子'}), 403
     
     post = Post.query.get_or_404(post_id)
     # 切换置顶状态
@@ -282,7 +307,11 @@ def toggle_sticky(post_id):
     db.session.commit()
     
     status = '置顶' if post.is_sticky else '取消置顶'
-    flash(f'帖子已成功{status}', 'success')
+    return jsonify({
+        'status': 'success', 
+        'message': f'帖子已成功{status}',
+        'is_sticky': post.is_sticky
+    })
     return redirect(url_for('main.forum'))
 
 # 分类管理路由 - 开始
@@ -407,7 +436,10 @@ def delete_category(category):
 def album_detail(album_id):
     album = Album.query.get_or_404(album_id)
     all_albums = Album.query.all()
-    return render_template('main/album_detail.html', album=album, all_albums=all_albums)
+    # 创建表单实例并设置选项
+    form = MovePhotoForm()
+    form.target_album_id.choices = [(a.id, a.title) for a in all_albums if a.id != album_id]
+    return render_template('main/album_detail.html', album=album, all_albums=all_albums, form=form)
 
 # 添加删除相册路由
 @main.route('/admin/albums/delete/<int:album_id>', methods=['POST'])
@@ -421,8 +453,11 @@ def delete_album(album_id):
     
     # 删除相册中的所有照片
     for photo in album.photos:
-        # 从S3删除照片
-        delete_from_s3(photo.s3_url)
+        # 从S3删除照片 - 忽略删除结果，因为文件可能已手动删除
+        try:
+            delete_from_s3(photo.s3_url)
+        except Exception as e:
+            logger.warning(f"忽略S3删除错误: {str(e)}")
         # 从数据库删除照片记录
         db.session.delete(photo)
     
@@ -457,19 +492,39 @@ def delete_photo(photo_id):
 @main.route('/admin/photos/move', methods=['POST'])
 @login_required
 def move_photo():
+    # 获取所有相册用于表单选项
+    all_albums = Album.query.all()
+    form = MovePhotoForm()
+    # 为目标相册字段设置选项
+    form.target_album_id.choices = [(a.id, a.title) for a in all_albums]
+    
+    # 验证表单和CSRF令牌
+    if not form.validate_on_submit():
+        current_app.logger.error('表单验证失败: %s', form.errors)
+        return jsonify({'status': 'error', 'message': '表单验证失败', 'errors': form.errors}), 400
+    
     if not current_user.is_admin:
         flash('只有管理员可以移动照片', 'danger')
         return redirect(url_for('main.memories'))
 
-    photo_id = request.form.get('photo_id')
-    target_album_id = request.form.get('target_album_id')
+    photo = Photo.query.get_or_404(form.photo_id.data)
+    target_album = Album.query.get_or_404(form.target_album_id.data)
     
-    photo = Photo.query.get_or_404(photo_id)
-    target_album = Album.query.get_or_404(target_album_id)
+    # 保存原相册ID用于重定向
+    original_album_id = photo.album_id
     
     # 更新照片的相册ID
-    photo.album_id = target_album_id
+    photo.album_id = target_album.id
     db.session.commit()
     
     flash('照片已成功移动到相册《{}》'.format(target_album.title), 'success')
-    return redirect(url_for('main.album_detail', album_id=photo.album_id))
+    # 使用原相册ID重定向，保持在原相册页面
+    return redirect(url_for('main.album_detail', album_id=original_album_id))
+from flask_wtf import FlaskForm
+from wtforms import HiddenField, SelectField
+from wtforms.validators import DataRequired
+
+# 添加移动照片表单类
+class MovePhotoForm(FlaskForm):
+    photo_id = HiddenField('Photo ID', validators=[DataRequired()])
+    target_album_id = SelectField('Target Album', validators=[DataRequired()])

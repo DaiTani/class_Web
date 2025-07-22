@@ -6,6 +6,8 @@
 <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4">创建新相册</h2>
     <form method="POST" enctype="multipart/form-data">
+        <!-- 添加CSRF令牌字段 -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-4">
             <label for="title" class="block text-gray-700">相册标题</label>
             <input type="text" id="title" name="title" class="w-full p-2 border rounded" required>

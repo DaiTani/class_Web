@@ -45,8 +45,9 @@
                     <div class="text-gray-600 text-sm">回忆照片</div>
                 </div>
                 <div class="bg-white p-4 rounded-lg text-center">
-                    <div class="text-3xl font-bold text-yellow-500 mb-1">{{ activity_count }}</div>
-                    <div class="text-gray-600 text-sm">班级活动</div>
+                    <div class="text-3xl font-bold text-yellow-500 mb-1">{{ member_count }}</div>
+                    <div class="text-gray-600 text-sm">注册用户数</div>
+                </div>
                 </div>
             </div>
         </div>
@@ -67,11 +68,8 @@
             <div class="text-primary font-medium mb-2">前端开发</div>
             <p class="text-gray-600 mb-3 text-sm">界面设计与用户体验</p>
             <div class="flex justify-center space-x-3">
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <a href="https://www.doubao.com/chat/" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                     <i class="fab fa-github text-gray-600"></i>
-                </a>
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <i class="fab fa-weixin text-green-500"></i>
                 </a>
             </div>
         </div>
@@ -84,11 +82,8 @@
             <div class="text-primary font-medium mb-2">后端开发</div>
             <p class="text-gray-600 mb-3 text-sm">服务器与数据库设计</p>
             <div class="flex justify-center space-x-3">
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <a href="https://github.com/DaiTani" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                     <i class="fab fa-github text-gray-600"></i>
-                </a>
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <i class="fab fa-qq text-blue-500"></i>
                 </a>
             </div>
         </div>
@@ -100,13 +95,12 @@
             <h3 class="text-lg font-bold text-gray-800 mb-1">唐浩天</h3>
             <div class="text-primary font-medium mb-2">班长</div>
             <p class="text-gray-600 mb-3 text-sm">设计建议与资源支持</p>
-            <div class="flex justify-center space-x-3">
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-envelope text-gray-600"></i>
-                </a>
-                <a href="#" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-phone text-blue-500"></i>
-                </a>
+            <div class="flex justify-center items-center">
+            <div class="flex justify-center items-center mt-2">
+                <button class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full px-4 py-2 text-sm transition-all duration-300" onclick="document.getElementById('phone-number').classList.toggle('hidden');">
+                    <i class="fas fa-phone mr-2"></i>
+                    <span id="phone-number" class="hidden ml-2">联系电话 13800138000</span>
+                </button>
             </div>
         </div>
     </div>
@@ -183,7 +177,7 @@
                 </li>
                 <li class="flex justify-between pb-2 border-b border-gray-100">
                     <span>宣传委员:</span>
-                    <span class="font-medium">王耀成</span>
+                    <span class="font-medium">王耀铖</span>
                 </li>
             </ul>
         </div>

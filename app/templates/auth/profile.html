@@ -1,14 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card" style="width: 18rem;">
-  <div class="card-body">
-    <h5 class="card-title">个人资料</h5>
-    <h6 class="card-subtitle mb-2 text-muted">{{ current_user.name }}</h6>
-    <p class="card-text">邮箱: {{ current_user.email }}</p>
-    <p class="card-text">注册时间: {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
-    <a href="{{ url_for('auth.edit_profile') }}" class="card-link">编辑资料</a>
-    <a href="{{ url_for('auth.logout') }}" class="card-link">退出登录</a>
-  </div>
+<div class="container py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- 个人资料卡片 -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+            <!-- 头部背景 -->
+            <div class="h-32 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+
+            <!-- 个人信息 -->
+            <div class="pt-8 pb-8 px-6 md:px-10">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-6">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">{{ current_user.name }}</h1>
+                        <p class="text-gray-500">{{ current_user.email }}</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <a href="{{ url_for('auth.edit_profile') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition-colors duration-200 transform hover:-translate-y-0.5">
+                            <i class="fas fa-edit mr-2"></i> 编辑资料
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 详细信息 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                    <div class="flex items-start">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-calendar text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500">注册时间</h3>
+                            <p class="text-gray-800">{{ current_user.created_at.strftime('%Y年%m月%d日') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-user-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500">账户状态</h3>
+                            <p class="text-gray-800">{% if current_user.is_admin %}管理员{% else %}普通用户{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="mt-10 flex justify-center space-x-4">
+                    <a href="{{ url_for('auth.edit_profile') }}" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-cog mr-1"></i> 设置
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="px-5 py-2 border border-red-300 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> 退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

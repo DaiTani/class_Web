@@ -2,17 +2,21 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>{% block title %}生工24-3班{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 添加Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 调整Tailwind配置，移除命名空间前缀 -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
         tailwind.config = {
+            // 移除prefix配置
             theme: {
                 extend: {
                     colors: {
                         primary: '#4F46E5',
                         secondary: '#10B981',
+                        accent: '#F59E0B',
                         light: '#F9FAFB',
                         dark: '#1F2937'
                     }
@@ -20,15 +24,44 @@
             }
         }
     </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto { content-visibility: auto; }
+            .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+            .gradient-icon {
+                background: linear-gradient(135deg, #4F46E5 0%, #10B981 100%);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
         
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
             min-height: 100vh;
+            font-size: 16px; /* 设置基准字体大小 */
+            line-height: 1.6; /* 优化行高提高可读性 */
+            letter-spacing: 0.02em; /* 微调字间距 */
         }
-        
+
+        /* 添加响应式字体设置 */
+        @media (max-width: 640px) {
+            body {
+                font-size: 15px; /* 手机端适当减小基准字体 */
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            h3 {
+                font-size: 1.3rem;
+            }
+        }
+
         .card {
             transition: all 0.3s ease;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -36,95 +69,102 @@
             overflow: hidden;
             background: white;
         }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
     </style>
     {% block extra_css %}{% endblock %}
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap JS with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- 删除CSRF meta标签 -->
+    <!-- 移除Bootstrap JS -->
+    <meta name="csrf_token" content="{{ csrf_token() }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
 <body class="bg-gray-50">
-    <!-- 导航栏 -->
-    <nav class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3">
-                <i class="fas fa-graduation-cap text-white text-xl"></i>
+    <!-- 导航栏 - 替换Bootstrap导航组件 -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 gradient-icon w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-graduation-cap text-white text-xl"></i>
+                    </div>
+                    <a href="{{ url_for('main.index') }}" class="text-2xl font-bold text-gray-800">生工24-3班</a>
+                </div>
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{{ url_for('main.index') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-home mr-2"></i>首页
+                    </a>
+                    <a href="{{ url_for('main.forum') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-comments mr-2"></i>论坛
+                    </a>
+                    <a href="{{ url_for('main.memories') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-images mr-2"></i>回忆录
+                    </a>
+                    <a href="{{ url_for('main.about') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-users mr-2"></i>关于我们
+                    </a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.profile') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-user mr-2"></i>{{ current_user.name }}
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">注册</a>
+                        <a href="{{ url_for('auth.login') }}" class="px-3 py-2 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">登录</a>
+                    {% endif %}
+                </div>
+                <!-- 移动端菜单按钮 -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">生工24-3班</h1>
         </div>
-        <div class="flex items-center space-x-4">
-            <a href="{{ url_for('main.index') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                <i class="fas fa-home mr-2"></i>首页
-            </a>
-            <a href="{{ url_for('main.forum') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                <i class="fas fa-comments mr-2"></i>论坛
-            </a>
-            <a href="{{ url_for('main.memories') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                <i class="fas fa-images mr-2"></i>回忆录
-            </a>
-            <a href="{{ url_for('main.about') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                <i class="fas fa-users mr-2"></i>关于我们
-            </a>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('auth.profile') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                    <i class="fas fa-user mr-2"></i>{{ current_user.name }}
-                </a>
-                <a href="{{ url_for('auth.logout') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
-                    <i class="fas fa-sign-out-alt mr-2"></i>退出
-                </a>
-            {% else %}
-                <a href="{{ url_for('auth.register') }}" class="px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">注册</a>
-                <a href="{{ url_for('auth.login') }}" class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700 transition">登录</a>
-            {% endif %}
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <!-- 移动端导航链接 - 与桌面版相同 -->
+                <a href="{{ url_for('main.index') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">首页</a>
+                <a href="{{ url_for('main.forum') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">论坛</a>
+                <a href="{{ url_for('main.memories') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">回忆录</a>
+                <a href="{{ url_for('main.about') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">关于我们</a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.profile') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">{{ current_user.name }}</a>
+                <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">退出</a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">注册</a>
+                <a href="{{ url_for('auth.login') }}" class="block px-3 py-2 bg-primary text-white rounded-lg font-medium hover:bg-indigo-700">登录</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
     <!-- 主要内容 -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- 删除确认模态框 -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteConfirmModalLabel">确认删除</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    确定要删除这条内容吗？此操作不可撤销。
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- 添加Bootstrap JS和Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
     <script>
-    // 删除确认模态框逻辑
-    document.addEventListener('DOMContentLoaded', function() {
-      const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-      let formToSubmit = null;
-    
-      // 监听删除按钮点击事件
-      document.querySelectorAll('[data-bs-target="#deleteConfirmModal"]').forEach(button => {
-        button.addEventListener('click', function() {
-          const formId = this.getAttribute('data-form-id');
-          formToSubmit = document.getElementById(formId);
-          deleteModal.show();
+        // 移动端菜单切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    // 切换菜单显示状态
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
         });
-      });
-    
-      // 确认删除按钮点击事件
-      confirmDeleteBtn.addEventListener('click', function() {
-        if (formToSubmit) {
-          formToSubmit.submit();
-        }
-      });
-    });
     </script>
+</body>
+</html>

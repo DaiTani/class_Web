@@ -88,8 +88,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(64), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # 现在可以正确调用utcnow()
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)  # 添加此行跟踪最后活动时间
 
     def set_password(self, password):
         # 显式指定算法

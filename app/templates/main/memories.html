@@ -11,45 +11,49 @@
 <!-- 上传相册模态框按钮 -->
 {% if current_user.is_authenticated %}
 <div class="text-center mb-8">
-    <button type="button" class="px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
+    <button type="button" id="openModalBtn" class="px-6 py-3 bg-gradient-to-r from-secondary to-green-600 text-white rounded-lg font-medium hover:shadow-lg transition duration-300 transform hover:scale-105">
         <i class="fas fa-upload mr-2"></i> 上传新相册
     </button>
 </div>
 {% endif %}
 
 <!-- 创建相册模态框 -->
-<div class="modal fade" id="createAlbumModal" tabindex="-1" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createAlbumModalLabel">创建新相册</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div id="createAlbumModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h5 class="text-xl font-bold text-gray-800" id="createAlbumModalLabel">创建新相册</h5>
+                <button type="button" class="text-gray-400 hover:text-gray-500" id="closeModalBtn">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="modal-body">
-                <form method="POST" action="{{ url_for('main.create_album') }}" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="albumTitle" class="form-label">相册标题</label>
-                        <input type="text" class="form-control" id="albumTitle" name="title" required>
+        </div>
+        <div class="p-6">
+            <form method="POST" action="{{ url_for('main.create_album') }}" enctype="multipart/form-data" id="albumForm">
+                <!-- 添加CSRF令牌字段 -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-4">
+                    <label for="albumTitle" class="block text-sm font-medium text-gray-700 mb-1">相册标题</label>
+                    <input type="text" id="albumTitle" name="title" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" required>
+                </div>
+                <div class="mb-4">
+                    <label for="albumDescription" class="block text-sm font-medium text-gray-700 mb-1">相册描述</label>
+                    <textarea id="albumDescription" name="description" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">上传照片</label>
+                    <div id="dropArea" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-3 hover:bg-gray-50 transition cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600">拖放照片到此处，或 <span class="text-primary font-medium">点击选择文件</span></p>
+                        <input class="hidden" type="file" id="albumPhotos" multiple accept="image/*" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="albumDescription" class="form-label">相册描述</label>
-                        <textarea class="form-control" id="albumDescription" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">上传照片</label>
-                        <div id="dropArea" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-3 hover:bg-gray-50 transition cursor-pointer">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-600">拖放照片到此处，或 <span class="text-primary font-medium">点击选择文件</span></p>
-                            <input class="d-none" type="file" id="albumPhotos" name="photos" multiple accept="image/*" required>
-                        </div>
-                        <div class="form-text mb-3">支持JPG、PNG、GIF格式，最多上传10张照片</div>
-                        
-                        <!-- 文件预览区域 -->
-                        <div id="previewContainer" class="d-flex flex-wrap gap-3 mb-3"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">创建相册</button>
-                </form>
-            </div>
+                    <div class="text-sm text-gray-500 mb-3">支持JPG、PNG、GIF格式，最多上传10张照片</div>
+                    
+                    <!-- 文件预览区域 -->
+                    <div id="previewContainer" class="flex flex-wrap gap-3 mb-3"></div>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]" id="submitBtn">创建相册</button>
+            </form>
         </div>
     </div>
 </div>
@@ -59,20 +63,22 @@
     <!-- 时间线内容保持不变 -->
 </div>
 
-<!-- 照片网格 - 更新为动态显示 -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+<!-- 照片网格 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
     {% for album in albums %}
-    <a href="{{ url_for('main.album_detail', album_id=album.id) }}" class="photo-card card aspect-square">
-        {% if album.photos %}
-        <img src="{{ album.photos[0].s3_url }}" alt="{{ album.title }}" class="w-full h-full object-cover">
-        {% else %}
-        <div class="bg-gray-300 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center">
-            <i class="fas fa-camera text-gray-400 text-3xl"></i>
+    <a href="{{ url_for('main.album_detail', album_id=album.id) }}" class="group flex flex-col items-center rounded-xl shadow-md overflow-hidden">
+        <div class="aspect-[3/4] sm:aspect-square w-full overflow-hidden bg-gray-100">
+            {% if album.photos %}
+            <img src="{{ album.photos[0].s3_url }}" alt="{{ album.title }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center">
+                <i class="fas fa-camera text-gray-400 text-3xl"></i>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-        <div class="photo-info">
-            <div class="text-sm font-semibold">{{ album.title }}</div>
-            <div class="text-xs opacity-80">{{ album.created_at.strftime('%Y.%m.%d') }} · {{ album.photos|length }}张照片</div>
+        <div class="w-full p-3 bg-white">
+            <div class="text-gray-800 text-sm font-semibold truncate">{{ album.title }}</div>
+            <div class="text-gray-500 text-xs truncate">{{ album.created_at.strftime('%Y.%m.%d') }} · {{ album.photos|length }}张照片</div>
         </div>
     </a>
     {% endfor %}
@@ -81,91 +87,68 @@
 
 {% block extra_css %}
 <style>
-    .photo-card {
-        overflow: hidden;
-        border-radius: 12px;
-        position: relative;
-    }
-    .photo-card img {
-        transition: transform 0.5s ease;
-    }
-    .photo-card:hover img {
-        transform: scale(1.05);
-    }
-    .photo-info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 10px;
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-    }
-    .photo-card:hover .photo-info {
-        transform: translateY(0);
-    }
-    .active-tab {
-        background: #4F46E5;
-        color: white;
-    }
+    .photo-card { overflow: hidden; border-radius: 12px; position: relative; }
+    .photo-card img { transition: transform 0.5s ease; }
+    .photo-card:hover img { transform: scale(1.05); }
+    .photo-info { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 10px; transform: translateY(100%); transition: transform 0.3s ease; }
+    .photo-card:hover .photo-info { transform: translateY(0); }
+    .active-tab { background: #4F46E5; color: white; }
     
     /* 上传区域样式 */
-    #dropArea.drag-over {
-        border-color: #4F46E5;
-        background-color: rgba(79, 70, 229, 0.05);
-    }
+    #dropArea { border: 2px dashed #d1d5db; border-radius: 0.75rem; transition: all 0.2s ease-in-out; }
+    #dropArea:hover { border-color: #4F46E5; background-color: rgba(79, 70, 229, 0.05); }
+    #dropArea.drag-over { border-color: #4F46E5; background-color: rgba(79, 70, 229, 0.1); }
     
     /* 预览图片样式 */
-    .preview-item {
-        position: relative;
-        width: 100px;
-        height: 100px;
-        border-radius: 8px;
-        overflow: hidden;
-    }
+    .preview-item { position: relative; width: 80px; height: 80px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .preview-img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-remove { position: absolute; top: -6px; right: -6px; background: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; font-size: 16px; color: #e53e3e; }
     
-    .preview-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .preview-remove {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: white;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        font-size: 16px;
-        color: #e53e3e;
-    }
-    
-    /* 响应式调整 */
-    @media (max-width: 768px) {
-        .modal-dialog {
-            margin: 0.5rem;
-            max-width: none;
-        }
-        
-        .preview-item {
-            width: 80px;
-            height: 80px;
-        }
-    }
+    /* 相册卡片悬停效果 */
+    .photo-card { transition: all 0.3s ease; }
+    .photo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// 模态框控制
+const modal = document.getElementById('createAlbumModal');
+const modalContent = document.getElementById('modalContent');
+const openModalBtn = document.getElementById('openModalBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
+if (openModalBtn && modal && modalContent) {
+    openModalBtn.addEventListener('click', function() {
+        modal.classList.remove('hidden');
+        // 添加动画效果
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    });
+}
+
+if (closeModalBtn && modal && modalContent) {
+    closeModalBtn.addEventListener('click', function() {
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        // 等待动画完成后隐藏
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    });
+}
+
+// 点击模态框外部关闭
+if (modal) {
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModalBtn.click();
+        }
+    });
+}
+
 // 文件上传功能实现
 function initFileUpload() {
     const dropArea = document.getElementById('dropArea');
@@ -208,6 +191,19 @@ function initFileUpload() {
         }, false);
     });
 
+    // 阻止拖放默认行为
+    ['dragover', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (eventName === 'dragover') {
+                dropArea.classList.add('drag-over');
+            } else {
+                dropArea.classList.remove('drag-over');
+            }
+        }, false);
+    });
+
     // 处理拖放文件
     dropArea.addEventListener('drop', handleDrop, false);
 
@@ -229,14 +225,15 @@ function initFileUpload() {
         
         // 检查文件数量
         if (selectedFiles.length + files.length > maxFiles) {
-            alert(`最多只能上传${maxFiles}张照片`);
+            console.log('文件数量超出限制');
             return;
         }
-
+        
         // 添加新文件并显示预览
         Array.from(files).forEach(file => {
-            if (!file.type.match('image.*')) {
-                alert('请仅选择图片文件');
+            const isImage = file.type.match('image.*');
+            if (!isImage) {
+                console.log('不支持的文件类型:', file.name);
                 return;
             }
             
@@ -273,6 +270,126 @@ function initFileUpload() {
         
         reader.readAsDataURL(file);
     }
-});
+
+    // 添加异步表单提交处理
+    const albumForm = document.getElementById('albumForm');
+    if (albumForm) {
+        albumForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+
+            // 显示加载状态
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 上传中...';
+
+            try {
+                // 创建FormData并添加所有表单数据
+                const formData = new FormData(this);
+                // 添加已选择的文件
+                selectedFiles.forEach(file => {
+                    formData.append('photos', file);
+                });
+
+                // 获取CSRF令牌
+                const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+
+                // 发送异步请求
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+
+                if (response.ok) {
+                    // 上传成功，刷新页面或重定向
+                    window.location.reload();
+                } else {
+                    throw new Error('上传失败: ' + await response.text());
+                }
+            } catch (error) {
+                console.error('异步上传错误:', error);
+                // 显示错误信息（可替换为页面元素显示）
+                alert('上传失败: ' + error.message);
+            } finally {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+}
+
+// 关键修复：将初始化代码移至script标签内部
+ document.addEventListener('DOMContentLoaded', initFileUpload);
+
+    // 添加照片查看器功能
+    function openPhotoViewer(photoId, albumId) {
+        console.log('打开照片查看器:', photoId, albumId);
+        // 实现照片查看逻辑
+    }
+
+    // 添加照片删除确认功能
+    function confirmDeletePhoto(photoId) {
+        if (confirm('确定要删除这张照片吗？')) {
+            deletePhoto(photoId);
+        }
+    }
+
+    // 添加照片删除功能
+    async function deletePhoto(photoId) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+            const response = await fetch(`{{ url_for('main.delete_photo', photo_id=0) }}`.replace('0', photoId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('删除失败');
+            }
+        } catch (error) {
+            console.error('删除照片错误:', error);
+            alert('删除失败: ' + error.message);
+        }
+    }
+
+    // 添加相册详情查看功能
+    function openAlbumDetail(albumId) {
+        window.location.href = `{{ url_for('main.album_detail', album_id=0) }}`.replace('0', albumId);
+    }
+
+    // 添加相册删除确认功能
+    function confirmDeleteAlbum(albumId) {
+        if (confirm('确定要删除这个相册吗？此操作不可恢复。')) {
+            deleteAlbum(albumId);
+        }
+    }
+
+    // 添加相册删除功能
+    async function deleteAlbum(albumId) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+            const response = await fetch(`{{ url_for('main.delete_album', album_id=0) }}`.replace('0', albumId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('删除失败');
+            }
+        } catch (error) {
+            console.error('删除相册错误:', error);
+            alert('删除失败: ' + error.message);
+        }
+    }
 </script>
     {% endblock %}

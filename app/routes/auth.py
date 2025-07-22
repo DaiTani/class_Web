@@ -2,6 +2,10 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user, login_user, logout_user
 from app.models.user import User
 from app import db
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from app.utils.s3_upload import upload_to_s3, delete_from_s3
+import os
+import uuid
 
 auth = Blueprint('auth', __name__)
 
@@ -71,18 +75,43 @@ def logout():
 @auth.route('/profile')
 @login_required
 def profile():
-    return render_template('auth/profile.html')
+    # 添加user=current_user参数
+    return render_template('auth/profile.html', user=current_user)
 
 @auth.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    if request.method == 'POST':
-        current_user.name = request.form.get('name')
-        current_user.email = request.form.get('email')
-        password = request.form.get('password')
-        if password:
-            current_user.set_password(password)
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        # 处理头像上传
+        if 'avatar' in request.files and request.files['avatar'].filename:
+            avatar_file = request.files['avatar']
+            # 生成唯一文件名
+            filename = f"avatars/{uuid.uuid4()}_{avatar_file.filename}"
+            # 上传到S3
+            try:
+                # 删除旧头像（如果存在）
+                if current_user.avatar_url:
+                    delete_from_s3(current_user.avatar_url)
+                # 上传新头像
+                current_user.avatar_url = upload_to_s3(avatar_file, filename)
+            except Exception as e:
+                flash(f'头像上传失败: {str(e)}', 'danger')
+                return redirect(url_for('auth.edit_profile'))
+
+        # 更新用户信息
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        if form.password.data:
+            current_user.set_password(form.password.data)
         db.session.commit()
-        flash('个人资料已更新!')
+        flash('个人资料已更新', 'success')
         return redirect(url_for('auth.profile'))
-    return render_template('auth/edit_profile.html')
+    elif request.method == 'GET':
+        form.name.data = current_user.name
+        form.email.data = current_user.email
+    # 修改render_template调用，添加user参数
+    return render_template('auth/edit_profile.html', form=form, user=current_user)
+from app.forms import LoginForm, RegistrationForm, EditProfileForm  # 添加此行导入新表单
+from werkzeug.security import generate_password_hash
+import uuid

@@ -2,7 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
-# 删除CSRF导入
+# 恢复CSRF导入
+from flask_wtf.csrf import CSRFProtect
 from app.config import Config
 
 # 从独立模块导入db
@@ -11,7 +12,8 @@ from app.models.db import db
 # 全局扩展实例
 migrate = Migrate()
 login_manager = LoginManager()
-# 删除CSRF初始化
+# 添加CSRF实例
+csrf = CSRFProtect()
 login_manager.login_view = 'auth.login'
 
 
@@ -23,10 +25,8 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    # 删除CSRF配置行
-    # app.config['WTF_CSRF_SECRET_KEY'] = app.config['SECRET_KEY']
-    # 删除CSRF初始化
-    # csrf.init_app(app)
+    # 恢复CSRF初始化
+    csrf.init_app(app)
 
     # 注册蓝图
     from app.routes.auth import auth

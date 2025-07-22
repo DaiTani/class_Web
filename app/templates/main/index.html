@@ -3,99 +3,84 @@
 {% block title %}班级社区平台 - 生工24-3班{% endblock %}
 
 {% block content %}
-<div class="text-center mb-16">
-    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">欢迎来到生工24-3班班级社区平台</h1>
-    <p class="text-xl text-gray-600 max-w-2xl mx-auto">连接班级成员，分享学习资源，记录美好回忆，共同成长的专属空间</p>
-    
-    <div class="mt-10 relative">
-        <div class="absolute -top-32 left-1/4 w-16 h-16 rounded-full bg-purple-200 opacity-70 floating"></div>
-        <div class="absolute top-10 right-1/4 w-24 h-24 rounded-full bg-green-200 opacity-70 floating" style="animation-delay: 1s;"></div>
-        <div class="absolute top-40 left-1/3 w-20 h-20 rounded-full bg-yellow-200 opacity-70 floating" style="animation-delay: 2s;"></div>
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">欢迎来到生工24-3班班级社区平台</h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">连接班级成员，分享学习资源，记录美好回忆，共同成长的专属空间</p>
         
-        <div class="relative bg-white card inline-block p-1 pulse">
-            <div class="bg-gradient-to-r from-blue-400 to-indigo-600 rounded-xl p-6 text-left max-w-md">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
-                        <i class="fas fa-user-graduate text-indigo-600 text-xl"></i>
+        <div class="mt-10 relative">
+            <div class="absolute -top-32 left-1/4 w-16 h-16 rounded-full bg-purple-200 opacity-70 floating"></div>
+            <div class="absolute top-10 right-1/4 w-24 h-24 rounded-full bg-green-200 opacity-70 floating" style="animation-delay: 1s;"></div>
+            <div class="absolute top-40 left-1/3 w-20 h-20 rounded-full bg-yellow-200 opacity-70 floating" style="animation-delay: 2s;"></div>
+            
+            <div class="relative bg-white card inline-block p-1 pulse">
+                <div class="bg-gradient-to-r from-blue-400 to-indigo-600 rounded-xl p-6 text-left max-w-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                            <i class="fas fa-user-graduate text-indigo-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-xl">2024级生物工程3班</h3>
+                            <p class="text-indigo-200">45位成员 <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>{{ online_count }}人在线</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-white text-xl">2024级生物工程3班</h3>
-                        <p class="text-indigo-200 flex items-center">
-                            <i class="fas fa-users mr-1"></i> 45位成员 · 
-                            <i class="fas fa-circle text-green-400 text-xs ml-2 mr-1"></i> {{ online_count }}位在线
-                        </p>
+                    <p class="text-indigo-100 mb-4">这是一个充满活力与创造力的班级，让我们一起学习、分享、成长！</p>
+                    <div class="flex space-x-2">
+                        <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">#逗比聚集地</span>
+                        <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">#活动丰富</span>
+                        <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white">#互帮互助</span>
                     </div>
-                </div>
-                <p class="text-indigo-100 mb-4">这是一个充满活力与创造力的班级，让我们一起学习、分享、成长！</p>
-                <div class="flex space-x-2">
-                    <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white flex items-center">
-                        <i class="fas fa-smile-wink mr-1"></i> #逗比聚集地
-                    </span>
-                    <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white flex items-center">
-                        <i class="fas fa-calendar-alt mr-1"></i> #活动丰富
-                    </span>
-                    <span class="px-3 py-1 bg-indigo-700 rounded-full text-xs text-white flex items-center">
-                        <i class="fas fa-hands-helping mr-1"></i> #互帮互助
-                    </span>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- 功能入口 -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-    <!-- 班级论坛 -->
-    <div class="relative">
-        <div class="card h-full">
-            <div class="p-6">
-                <div class="forum-icon w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg transform transition-transform hover:scale-110">
-                    <i class="fas fa-comments text-white text-3xl"></i>
+    
+    <!-- 功能区域维持不变 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <!-- 班级论坛 -->
+        <div class="card card-hover shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:-translate-y-2">
+            <div class="card-body text-center p-6">
+                <div class="w-16 h-16 forum-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-comments text-white text-2xl"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-3">班级论坛</h3>
+                <h3 class="text-xl font-bold mb-2">班级论坛</h3>
                 <p class="text-gray-600 mb-6">交流学习心得，分享课程资源，讨论班级事务的互动空间</p>
-                <a href="{{ url_for('main.forum') }}" class="inline-flex items-center text-primary font-medium hover:underline">
-                    进入论坛 <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{{ url_for('main.forum') }}" class="inline-block bg-primary hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-300 transform hover:scale-105">
+                    进入论坛→
                 </a>
             </div>
         </div>
-        <div class="feature-badge">热门</div>
-    </div>
-    
-    <!-- 班级回忆录 -->
-    <div class="relative">
-        <div class="card h-full">
-            <div class="p-6">
-                <div class="memories-icon w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg transform transition-transform hover:scale-110">
-                    <i class="fas fa-images text-white text-3xl"></i>
+
+        <!-- 班级回忆录 -->
+        <div class="card card-hover shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:-translate-y-2">
+            <div class="card-body text-center p-6">
+                <div class="w-16 h-16 memories-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-images text-white text-2xl"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-3">班级回忆录</h3>
+                <h3 class="text-xl font-bold mb-2">班级回忆录</h3>
                 <p class="text-gray-600 mb-6">记录班级活动、实验课、运动会等精彩瞬间的照片墙</p>
-                <a href="{{ url_for('main.memories') }}" class="inline-flex items-center text-primary font-medium hover:underline">
-                    查看回忆 <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{{ url_for('main.memories') }}" class="inline-block bg-secondary hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg transition duration-300 transform hover:scale-105">
+                    查看回忆→
                 </a>
             </div>
         </div>
-    </div>
-    
-    <!-- 关于我们 -->
-    <div class="relative">
-        <div class="card h-full">
-            <div class="p-6">
-                <div class="about-icon w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg transform transition-transform hover:scale-110">
-                    <i class="fas fa-users text-white text-3xl"></i>
+
+        <!-- 关于我们 -->
+        <div class="card card-hover shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:-translate-y-2">
+            <div class="card-body text-center p-6">
+                <div class="w-16 h-16 about-icon rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-white text-2xl"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-3">关于我们</h3>
+                <h3 class="text-xl font-bold mb-2">关于我们</h3>
                 <p class="text-gray-600 mb-6">了解班级概况、班委成员、课程安排和联系方式</p>
-                <a href="{{ url_for('main.about') }}" class="inline-flex items-center text-primary font-medium hover:underline">
-                    了解更多 <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{{ url_for('main.about') }}" class="inline-block bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg transition duration-300 transform hover:scale-105">
+                    了解更多→
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="mt-10 bg-white rounded-lg shadow-md overflow-hidden transform transition duration-500 hover:shadow-lg">
+<div class="mt-10 bg-white rounded-xl shadow-md overflow-hidden transform transition duration-500 hover:shadow-lg">
     <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
         <h3 class="text-xl font-bold text-white flex items-center">
             <i class="fas fa-bullhorn mr-2 animate-pulse"></i>班级公告
@@ -110,7 +95,7 @@
         {% if announcements %}
             <div class="space-y-6">
                 {% for ann in announcements %}
-                    <div class="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <div class="border-l-4 border-blue-500 pl-4 py-2 hover:bg-blue-50 rounded transition duration-200">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition duration-150">
                                 {{ ann.title }}
@@ -147,6 +132,22 @@
 
 {% block extra_css %}
 <style>
+    .floating {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
     .forum-icon { background: linear-gradient(135deg, #4F46E5, #818CF8); }
     .memories-icon { background: linear-gradient(135deg, #10B981, #34D399); }
     .about-icon { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
@@ -164,21 +165,5 @@
     }
     .card-hover { transition: all 0.3s ease; }
     .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-    .floating {
-        animation: float 6s ease-in-out infinite;
-    }
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-        100% { transform: translateY(0px); }
-    }
-    .pulse {
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
 </style>
 {% endblock %}

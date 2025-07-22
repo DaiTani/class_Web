@@ -2,83 +2,78 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- 添加返回按钮 -->
+    <div class="mb-6">
+        <a href="{{ url_for('main.forum') }}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition duration-300 shadow-sm">
+            <i class="fas fa-arrow-left mr-2"></i> 返回论坛
+        </a>
+    </div>
+    
     <!-- 帖子标题区域 -->
-    <div class="mb-8 border-b pb-4">
+    <div class="mb-8 border-b pb-4 bg-white rounded-xl shadow-sm p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ post.title }}</h1>
-        <p class="text-gray-600 mb-4">发布者: {{ post.author.username }}</p>
-        <!-- 删除帖子标题区域中多余的评论表单 -->
-        <div class="flex items-center text-gray-500 text-sm mb-6">
-            <span>发布者: {{ post.author.username }}</span>
-            <span class="mx-2">•</span>
-            <span>{{ post.created_at.strftime('%Y-%m-%d') }}</span>
-            <span class="mx-2">•</span>
-            <span>浏览量: {{ post.views }}</span>
-            <span class="mr-4">{{ post.comments|length }} 评论</span>
-            
-            <!-- 修改点赞按钮实现 -->
-            <button id="post-like-btn-{{ post.id }}" class="like-btn text-gray-500 hover:text-blue-500 flex items-center" data-post-id="{{ post.id }}">
+        <p class="text-gray-600 mb-4">发布者: {{ post.author.name }}</p>
+        <div class="flex flex-wrap items-center text-gray-500 text-sm gap-4 mb-2">
+            <div class="flex items-center">
+                <img src="https://picsum.photos/id/{{ post.author_id }}/32/32" alt="用户头像" class="w-6 h-6 rounded-full mr-2">
+                <span>{{ post.author.name }}</span>
+            </div>
+            <span class="flex items-center"><i class="far fa-clock mr-1"></i> {{ post.created_at.strftime('%Y-%m-%d') }}</span>
+            <span class="flex items-center"><i class="far fa-eye mr-1"></i> {{ post.views }} 浏览</span>
+            <span class="flex items-center"><i class="far fa-comment mr-1"></i> {{ post.comments|length }} 评论</span>
+            <button id="post-like-btn-{{ post.id }}" class="like-btn text-gray-500 hover:text-blue-500 flex items-center ml-auto" data-post-id="{{ post.id }}">
                 <i class="fas fa-thumbs-up mr-1"></i> <span class="count">{{ post.like_count }}</span>
             </button>
-
             {% if current_user.is_authenticated and current_user.id == post.author_id %}
-            <form method="POST" action="{{ url_for('main.delete_post', post_id=post.id) }}">
-                <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('确定要删除吗？')">删除帖子</button>
-            </form>
+            <button id="delete-post-btn" class="text-red-500 hover:text-red-700 ml-2">
+                <i class="fas fa-trash-alt mr-1"></i> 删除帖子
+            </button>
             {% endif %}
-            
-            <!-- 删除以下错误放置的评论表单 -->
-            <!-- 3. 添加评论表单添加CSRF令牌 -->
-            <!-- 4. 删除评论表单添加CSRF令牌 -->
+            <button id="toggle-sticky-btn" class="text-blue-500 hover:text-blue-700 ml-2">
+                <i class="fas fa-thumbtack mr-1"></i> {% if post.is_sticky %}取消置顶{% else %}置顶{% endif %}
+            </button>
         </div>
     </div>
 
     <!-- 帖子内容区域 -->
-    <div class="prose max-w-none mb-8 bg-white p-6 rounded-lg shadow-sm">
+    <div class="prose max-w-none mb-8 bg-white p-8 rounded-xl shadow-md transition duration-300 hover:shadow-lg">
         {{ post.content|safe }}
     </div>
 
-    <!-- 评论区 -->
-    <!-- 1. 修复评论区表单结构 -->
-    <div class="bg-white p-6 rounded-lg shadow-sm">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">评论 ({{ post.comments|length }})</h2>
-        
-        <!-- 评论输入框 - 确保只保留一个 -->
+    <!-- 恢复评论区HTML结构 -->
+    <div class="comments-section mt-10 bg-white p-6 rounded-xl shadow-sm">
+        <h3 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="far fa-comments mr-2 text-primary"></i> 评论区 ({{ post.comments|length }})
+        </h3>
+
+        <!-- 评论输入框 -->
         {% if current_user.is_authenticated %}
-        <div class="mb-6">
-            <form method="POST" action="{{ url_for('main.add_comment', post_id=post.id) }}">
-                <textarea name="content" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="写下你的评论..." required></textarea>
-                <div class="mt-2 text-right">
-                    <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition flex items-center">
-                        <i class="fas fa-paper-plane mr-2"></i> 发布评论
-                    </button>
-                </div>
+        <div class="comment-form-container mb-6 p-4 bg-gray-50 rounded-lg">
+            <form id="comment-form" data-post-id="{{ post.id }}">
+                <textarea name="content" class="form-control w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary transition" rows="3" placeholder="写下你的评论..."></textarea>
+                <button type="submit" class="btn btn-primary mt-2 bg-primary hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-paper-plane mr-1"></i> 发布评论
+                </button>
             </form>
         </div>
         {% endif %}
-        
-        <!-- 2. 确保评论循环正确 -->
-        <div class="space-y-4">
+
+        <!-- 评论列表 -->
+        <div class="comments-list space-y-4">
             {% for comment in post.comments %}
-            <div class="border-b pb-4 comment-item">
-                <!-- 添加评论内容显示 -->
-                <div class="flex items-start mb-2">
-                    <img src="https://picsum.photos/id/{{ comment.author_id }}/32/32" alt="用户头像" class="w-8 h-8 rounded-full mr-3">
-                    <div>
-                        <div class="font-medium text-gray-800">{{ comment.author.username }}</div>
-                        <div class="text-gray-500 text-sm">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
-                    </div>
+            <div class="comment-item border-b pb-4 last:border-0 last:pb-0" data-comment-id="{{ comment.id }}">
+                <div class="comment-author flex items-center mb-2">
+                    <img src="https://picsum.photos/id/{{ comment.author_id }}/32/32" alt="用户头像" class="w-8 h-8 rounded-full mr-2 border-2 border-gray-100">
+                    <span class="font-medium">{{ comment.author.name }}</span>
+                    <span class="text-gray-500 text-sm ml-2">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
                 </div>
-                <div class="ml-11 mb-3">{{ comment.content }}</div>
-                
-                <!-- 评论点赞按钮 -->
-                <div class="ml-11 flex items-center">
-                    <button class="like-btn text-gray-500 hover:text-blue-500 flex items-center mr-4" data-comment-id="{{ comment.id }}">
+                <div class="comment-content mb-2 bg-gray-50 p-3 rounded-lg">{{ comment.content }}</div>
+                <div class="comment-actions">
+                    <button class="like-btn text-gray-500 hover:text-blue-500 flex items-center text-sm" data-comment-id="{{ comment.id }}">
                         <i class="fas fa-thumbs-up mr-1"></i> <span class="count">{{ comment.like_count }}</span>
                     </button>
-                    
-                    <!-- 删除评论按钮 -->
-                    {% if current_user.is_authenticated and current_user.id == comment.author_id %}
-                    <button class="delete-comment-btn text-red-500 text-sm hover:text-red-700" data-comment-id="{{ comment.id }}">
+                    {% if current_user.is_authenticated and (current_user.id == comment.author_id or current_user.is_admin) %}
+                    <button class="delete-comment-btn text-red-500 hover:text-red-700 ml-4 text-sm">
                         <i class="fas fa-trash-alt mr-1"></i> 删除
                     </button>
                     {% endif %}
@@ -88,193 +83,282 @@
         </div>
     </div>
 
-    <!-- 3. 优化JavaScript加载 -->
+    <!-- 添加CSRF令牌全局定义 -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 评论点赞功能
-        document.querySelectorAll('.like-btn').forEach(button => {
-            button.addEventListener('click', async function() {
-                const commentId = this.getAttribute('data-comment-id');
-                const countElement = this.querySelector('.count');
-                const iconElement = this.querySelector('i');
-                
-                // 显示加载状态
-                this.disabled = true;
-                iconElement.classList.add('fa-spin');
-                
-                try {
-                    const response = await fetch(`/comment/${commentId}/like`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-                    const data = await response.json();
-                    
-                    if (data.status === 'success') {
-                        // 更新点赞数
-                        countElement.textContent = data.like_count;
-                        
-                        // 更新按钮样式
-                        if (data.action === 'liked') {
-                            this.classList.remove('text-gray-500');
-                            this.classList.add('text-blue-500');
+        // 移除重复的CSRF令牌定义
+        // const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，开始初始化评论功能');
+            // 获取CSRF令牌
+            const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+            // 添加评论提交处理
+            const commentForm = document.getElementById('comment-form');
+            console.log('找到评论表单:', commentForm);
+            if (commentForm) {
+                console.log('评论表单数据属性:', commentForm.dataset);
+                const postId = commentForm.dataset.postId;
+                console.log('从data属性获取postId:', postId);
+                console.log('预期评论API地址:', `/post/${postId}/comment`);
+
+                commentForm.addEventListener('submit', async function(e) {
+                    console.log('触发评论提交事件');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('已阻止默认提交行为');
+
+                    // 验证postId
+                    if (!postId) {
+                        alert('无法获取帖子ID，请刷新页面重试');
+                        return;
+                    }
+
+                    const content = this.querySelector('textarea[name="content"]').value;
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+
+                    // 显示加载状态
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 提交中...';
+
+                    try {
+                        const response = await fetch(`/post/${postId}/comment`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: new URLSearchParams({
+                                'content': content
+                            })
+                        });
+
+                        if (response.ok) {
+                            // 清空输入框并刷新评论区
+                            this.querySelector('textarea[name="content"]').value = '';
+                            alert('评论发表成功！');
+                            setTimeout(() => location.reload(), 1000);
                         } else {
-                            this.classList.remove('text-blue-500');
-                            this.classList.add('text-gray-500');
+                            // 获取详细错误信息
+                            const errorText = await response.text();
+                            console.error('服务器返回错误:', errorText);
+                            throw new Error(`评论提交失败 (HTTP状态: ${response.status})`);
                         }
+                    } catch (error) {
+                        console.error('评论错误:', error);
+                        alert('评论提交失败，请重试');
+                    } finally {
+                        // 恢复按钮状态
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
                     }
-                } catch (error) {
-                    console.error('点赞失败:', error);
-                    alert('点赞操作失败，请重试');
-                } finally {
-                    // 恢复按钮状态
-                    this.disabled = false;
-                    iconElement.classList.remove('fa-spin');
-                }
-            });
-        });
-        // 添加评论删除功能
-        document.querySelectorAll('.delete-comment-btn').forEach(button => {
-            button.addEventListener('click', async function() {
-                if (!confirm('确定要删除这条评论吗？')) {
-                    return;
-                }
-                
-                const commentId = this.getAttribute('data-comment-id');
-                const commentElement = this.closest('.comment-item');
-                
-                try {
-                    const response = await fetch(`/comment/${commentId}/delete`, {
-                        method: 'DELETE',
-                        headers: {
+                });
+            }
+
+            // 遍历所有评论项并绑定事件
+            document.querySelectorAll('.comment-item').forEach(commentElement => {
+                // 绑定评论点赞事件
+                const likeButton = commentElement.querySelector('.like-btn[data-comment-id]');
+                if (likeButton) {
+                    likeButton.addEventListener('click', async function() {
+                        // 复用现有的评论点赞逻辑
+                        const commentId = this.dataset.commentId;
+                        const countElement = this.querySelector('.count');
+                        const iconElement = this.querySelector('i');
+
+                        this.disabled = true;
+                        iconElement.classList.add('fa-spin');
+
+                        try {
+                            const response = await fetch(`/comment/${commentId}/like`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRFToken': csrfToken
+                                },
+                                body: new URLSearchParams({})
+                            });
+
+                            if (!response.ok) throw new Error('网络响应异常');
+                            const data = await response.json();
+
+                            if (data.status === 'success') {
+                                countElement.textContent = data.like_count;
+                                if (data.action === 'liked') {
+                                    this.classList.remove('text-gray-500');
+                                    this.classList.add('text-blue-500');
+                                } else {
+                                    this.classList.remove('text-blue-500');
+                                    this.classList.add('text-gray-500');
+                                }
+                            }
+                        } catch (error) {
+                            console.error('评论点赞失败:', error);
+                            alert('评论点赞操作失败，请重试');
+                        } finally {
+                            this.disabled = false;
+                            iconElement.classList.remove('fa-spin');
                         }
                     });
-                    
-                    if (response.ok) {
-                        // 从DOM中移除评论元素
-                        commentElement.remove();
-                        // 可以添加一个成功提示
-                        alert('评论已删除');
-                    } else {
-                        alert('删除失败，请重试');
+                }
+
+                // 评论删除事件
+                const deleteButton = commentElement.querySelector('.delete-comment-btn');
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', async function() {
+                        // 复用现有的评论删除逻辑
+                        if (!confirm('确定要删除这条评论吗？')) return;
+
+                        // 修复：重命名变量避免冲突并先获取元素
+                        const currentCommentElement = this.closest('.comment-item');
+                        const commentId = currentCommentElement.dataset.commentId;
+
+                        this.disabled = true;
+                        this.querySelector('i').classList.add('fa-spin');
+
+                        try {
+                            const response = await fetch(`/comment/${commentId}/delete`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': csrfToken
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('删除失败');
+
+                            if (commentElement) commentElement.remove();
+                            alert('评论已删除');
+                        } catch (error) {
+                            console.error('删除评论失败:', error);
+                            alert('删除操作失败，请重试');
+                        } finally {
+                            this.disabled = false;
+                            this.querySelector('i').classList.remove('fa-spin');
+                        }
+                    });
+                }
+            }); // 添加缺失的forEach闭合括号
+
+            // 添加帖子异步删除功能
+            const deletePostBtn = document.getElementById('delete-post-btn');
+            if (deletePostBtn) {
+                deletePostBtn.addEventListener('click', async function() {
+                    if (!confirm('确定要删除吗？')) return;
+                    const postId = this.dataset.postId;
+                    const deleteIcon = this.querySelector('i');
+
+                    // 显示加载状态
+                    this.disabled = true;
+                    deleteIcon.classList.add('fa-spin');
+
+                    try {
+                        // 修复URL路径与后端路由匹配
+                        const response = await fetch(`/post/${postId}/delete`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        });
+
+                        if (!response.ok) throw new Error('删除失败');
+
+                        // 删除成功后重定向到帖子列表页
+                        window.location.href = '/posts';
+                    } catch (error) {
+                        console.error('删除帖子失败:', error);
+                        alert('删除操作失败，请重试');
+                        // 恢复按钮状态
+                        this.disabled = false;
+                        deleteIcon.classList.remove('fa-spin');
                     }
-                } catch (error) {
-                    console.error('删除评论失败:', error);
-                    alert('删除操作失败，请重试');
+                });
+            }
+
+            // 添加帖子置顶/取消置顶功能
+            const toggleStickyBtn = document.getElementById('toggle-sticky-btn');
+            if (toggleStickyBtn) {
+                toggleStickyBtn.addEventListener('click', async function() {
+                    const postId = this.dataset.postId;
+                    const iconElement = this.querySelector('i');
+                    const buttonText = this.textContent.trim().includes('置顶') ? '置顶' : '取消置顶';
+
+                    // 显示加载状态
+                    this.disabled = true;
+                    iconElement.classList.add('fa-spin');
+
+                    try {
+                        const response = await fetch(`/post/${postId}/toggle_sticky`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) throw new Error(data.message || '操作失败');
+
+                        // 更新按钮文本
+                        const newText = buttonText === '置顶' ? '取消置顶' : '置顶';
+                        this.innerHTML = `<i class="fas fa-thumbtack mr-1"></i> ${newText}`;
+
+                        alert(data.message);
+                    } catch (error) {
+                        console.error('置顶操作失败:', error);
+                        alert(`${buttonText}操作失败，请重试`);
+                    } finally {
+                        // 恢复按钮状态
+                        this.disabled = false;
+                        iconElement.classList.remove('fa-spin');
+                    }
+                });
+            }
+
+            // 帖子点赞功能
+            document.addEventListener('click', async function(e) {
+                if (e.target.closest('.like-btn[data-post-id]')) {
+                    const button = e.target.closest('.like-btn[data-post-id]');
+                    const postId = button.dataset.postId;
+                    const countElement = button.querySelector('.count');
+                    const iconElement = button.querySelector('i');
+
+                    button.disabled = true;
+                    iconElement.classList.add('fa-spin');
+
+                    try {
+                        const response = await fetch(`/post/${postId}/like`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: new URLSearchParams({})
+                        });
+
+                        if (!response.ok) throw new Error('网络响应异常');
+                        const data = await response.json();
+
+                        if (data.status === 'success') {
+                            countElement.textContent = data.like_count;
+                            if (data.action === 'liked') {
+                                button.classList.remove('text-gray-500');
+                                button.classList.add('text-blue-500');
+                            } else {
+                                button.classList.remove('text-blue-500');
+                                button.classList.add('text-gray-500');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('点赞失败:', error);
+                        alert('点赞操作失败，请重试');
+                    } finally {
+                        button.disabled = false;
+                        iconElement.classList.remove('fa-spin');
+                    }
                 }
             });
         });
-    });
     </script>
 </div>
 {% endblock %}
-
-<script>
-// 添加到post_detail.html底部
- document.addEventListener('DOMContentLoaded', function() {
-    // 帖子点赞功能
-    document.querySelectorAll('.like-btn[data-post-id]').forEach(button => {
-        button.addEventListener('click', async function() {
-            const postId = this.getAttribute('data-post-id');
-            const countElement = this.querySelector('.count');
-            const iconElement = this.querySelector('i');
-
-            // 显示加载状态
-            this.disabled = true;
-            iconElement.classList.add('fa-spin');
-
-            try {
-                const response = await fetch(`{{ url_for('main.like_post', post_id='POST_ID') }}`.replace('POST_ID', postId), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    // 更新点赞数
-                    countElement.textContent = data.like_count;
-
-                    // 更新按钮样式
-                    if (data.action === 'liked') {
-                        this.classList.remove('text-gray-500');
-                        this.classList.add('text-blue-500');
-                    } else {
-                        this.classList.remove('text-blue-500');
-                        this.classList.add('text-gray-500');
-                    }
-                }
-            } catch (error) {
-                console.error('点赞失败:', error);
-                alert('点赞操作失败，请重试');
-            } finally {
-                // 恢复按钮状态
-                this.disabled = false;
-                iconElement.classList.remove('fa-spin');
-            }
-        });
-    });
-    // 评论点赞功能
-    document.querySelectorAll('.like-btn').forEach(button => {
-        button.addEventListener('click', async function() {
-            const commentId = this.getAttribute('data-comment-id');
-            const countElement = this.querySelector('.count');
-            const iconElement = this.querySelector('i');
-            
-            // 显示加载状态
-            this.disabled = true;
-            iconElement.classList.add('fa-spin');
-            
-            try {
-                const response = await fetch(`/comment/${commentId}/like`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    // 更新点赞数
-                    countElement.textContent = data.like_count;
-                    
-                    // 更新按钮样式
-                    if (data.action === 'liked') {
-                        this.classList.remove('text-gray-500');
-                        this.classList.add('text-blue-500');
-                    } else {
-                        this.classList.remove('text-blue-500');
-                        this.classList.add('text-gray-500');
-                    }
-                }
-            } catch (error) {
-                console.error('点赞失败:', error);
-                alert('点赞操作失败，请重试');
-            } finally {
-                // 恢复按钮状态
-                this.disabled = false;
-                iconElement.classList.remove('fa-spin');
-            }
-        });
-    });
-    
-    // 获取CSRF Token辅助函数
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    const response = await fetch(`/comment/${commentId}/like`, {
-});
-</script>

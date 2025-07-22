@@ -1,7 +1,96 @@
-body { max-width: 500px; margin: 2rem auto; padding: 0 1rem; font-family: sans-serif; }
+body {
+    /* 移除固定宽度限制，改为响应式宽度 */
+    width: 100%; 
+    margin: 0 auto; 
+    padding: 0 1rem; 
+    font-family: sans-serif; 
+}
 h1 { color: #333; text-align: center; margin-bottom: 2rem; }
 .form-group { margin-bottom: 1rem; }
 label { display: block; margin-bottom: 0.5rem; }
 input { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
 button { width: 100%; padding: 0.7rem; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
 .register-link { text-align: center; margin-top: 1rem; }
+/* 响应式样式 */
+@media (max-width: 768px) {
+    /* 移动端导航栏调整 */
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    /* 移动端内容调整 */
+    main {
+        padding: 0.5rem !important;
+    }
+    
+    /* 卡片组件响应式 */
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* 按钮适配 */
+    button, .btn {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* 平板设备适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container-fluid {
+        padding: 0 2rem;
+    }
+}
+/* 全局样式 */
+:root {
+    --primary: #4F46E5;
+    --secondary: #10B981;
+    --light: #F9FAFB;
+    --dark: #1F2937;
+}
+
+
+
+.card-header {
+    background-color: var(--primary);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+}
+
+/* 导航栏链接样式 */
+.navbar-nav .nav-link {
+    color: var(--dark);
+    border-radius: 8px;
+    margin: 0 0.25rem;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: #f1f5f9;
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--primary);
+    font-weight: 500;
+}

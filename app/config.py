@@ -7,6 +7,12 @@ load_dotenv()
 # 确保此文件只包含以下内容
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
+    # 添加CSRF保护显式配置
+    CSRF_HEADER_NAME = 'X-CSRFToken'
+    CSRF_FIELD_NAME = 'csrf_token'
+    CSRF_COOKIE_SECURE = False  # 开发环境设为False，生产环境需设为True
+    CSRF_COOKIE_HTTPONLY = False
+    CSRF_COOKIE_SAMESITE = 'Lax'
     # 合并数据库连接配置
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 10,

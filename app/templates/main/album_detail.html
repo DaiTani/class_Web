@@ -3,85 +3,170 @@
 {% block title %}{{ album.title }} - 班级回忆录{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8" id="album-container">
     <!-- 相册标题和操作区 -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ album.title }}</h1>
-            <p class="text-gray-600 mt-2">{{ album.description }}</p>
-            <p class="text-sm text-gray-500 mt-1">{{ album.created_at.strftime('%Y年%m月%d日') }} 创建 · {{ album.photos|length }}张照片</p>
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div class="flex justify-between items-center mb-6 flex-col sm:flex-row">
+            <div class="w-full sm:w-auto mb-4 sm:mb-0">
+                <h1 class="text-3xl font-bold text-gray-800">{{ album.title }}</h1>
+                <p class="text-gray-600 mt-1">
+                    <i class="far fa-calendar-alt mr-2"></i> {{ album.created_at.strftime('%Y-%m-%d') }} 创建
+                    <span class="mx-2">•</span>
+                    <i class="far fa-images mr-2"></i> {{ album.photos|length }} 张照片
+                </p>
+                <!-- 添加相册描述区域 -->
+                {% if album.description %}
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <h3 class="text-gray-700 font-medium mb-2"><i class="fas fa-info-circle mr-2"></i>相册描述</h3>
+                    <p class="text-gray-600 whitespace-pre-line">{{ album.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="w-full sm:w-auto flex justify-end">
+                <a href="{{ url_for('main.memories') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-3">
+                    <i class="fas fa-arrow-left mr-1"></i> 返回
+                </a>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <button onclick="confirmDeleteAlbum('{{ album.id }}', '{{ album.title }}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-trash-alt mr-1"></i> 删除相册
+                </button>
+                {% endif %}
+            </div>
         </div>
-        {% if current_user.is_admin %}
-        <div class="flex gap-3">
-            <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition" 
-                    onclick="confirmDeleteAlbum({{ album.id }})">
-                <i class="fas fa-trash mr-1"></i> 删除相册
-            </button>
-        </div>
-        {% endif %}
     </div>
 
     <!-- 照片网格 -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-12">
+    <!-- 修改照片网格容器样式 -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {% for photo in album.photos %}
-        <div class="relative group" data-photo-id="{{ photo.id }}">
-            <img src="{{ photo.s3_url }}" alt="相册照片" class="w-full h-40 object-cover rounded-lg shadow-md">
+        <div class="relative group overflow-hidden rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.02] hover:shadow-md">
+            <!-- 修复S3 URL引用并添加完整错误处理 -->
+            <img src="{{ photo.s3_url if photo.s3_url else url_for('static', filename='images/placeholder.jpg') }}" 
+                 alt="{{ photo.description }}" class="w-full aspect-square object-cover z-0" 
+                 onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'; this.onerror=null;"
+                 onclick="openPhotoViewer('{{ photo.s3_url }}')">
+            
+            <!-- 统一按钮设计 - 照片下方卡片式（适配移动端和桌面端） -->
             {% if current_user.is_admin %}
-            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-gray-100" 
-                        onclick="confirmDeletePhoto({{ photo.id }}, event)">
-                    <i class="fas fa-times"></i>
+            <!-- 优化移动端按钮布局 - 增加内边距和间距 -->
+            <div class="bg-white rounded-b-lg shadow-lg p-3 mt-1 z-10">
+              <div class="flex justify-between space-x-3">
+                <button class="delete-photo-btn flex-1 bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-2 text-sm font-medium flex items-center justify-center gap-1 transform transition-all duration-200 hover:shadow-md"
+                        data-photo-id="{{ photo.id }}">
+                        <!-- 删除错误的onclick="openMoveModal({{ photo.id }})"属性 -->
+                  <i class="fas fa-trash-alt"></i> 删除
                 </button>
-                <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 hover:bg-gray-100" 
-                        onclick="openMovePhotoModal({{ photo.id }}, event)">
-                    <i class="fas fa-arrows-alt"></i>
+                <button class="move-photo-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-2 py-2 text-sm font-medium flex items-center justify-center gap-1 transform transition-all duration-200 hover:shadow-md"
+                        data-photo-id="{{ photo.id }}"
+                        onclick="openMoveModal({{ photo.id }})">
+                  <i class="fas fa-exchange-alt"></i> 移动
                 </button>
+              </div>
             </div>
             {% endif %}
+            
+            <!-- 已移除重复的桌面端按钮代码 -->
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-10 text-gray-500">
+            该相册暂无照片
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- 移动照片模态框 -->
-<div class="modal fade" id="movePhotoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">移动照片到相册</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="movePhotoForm" method="POST" action="{{ url_for('main.move_photo') }}">
-                    <input type="hidden" id="photoId" name="photo_id">
-                    <div class="mb-3">
-                        <label class="form-label">目标相册</label>
-                        <select class="form-select" name="target_album_id" required>
-                            {% for a in all_albums %}
-                            {% if a.id != album.id %}
-                            <option value="{{ a.id }}">{{ a.title }}</option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">移动</button>
-                </form>
+<!-- 删除提示区域 -->
+<div id="delete-progress" class="hidden container mx-auto px-4 py-16 text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500 mx-auto mb-4"></div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">相册正在删除中...</h2>
+    <p class="text-gray-600">系统正在后台处理删除操作，请稍后...</p>
+</div>
+
+<!-- 移动照片模态框 - 纯CSS+JS实现 -->
+<!-- 移动照片模态框 - 添加photo_id隐藏字段 -->
+<div id="movePhotoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 scale-95 opacity-0" id="moveModalContent">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h5 class="text-xl font-bold text-gray-800">移动照片到相册</h5>
+                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeMoveModal()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
         </div>
+        <div class="p-6">
+            <form id="movePhotoForm" method="POST" action="{{ url_for('main.move_photo') }}">
+                {{ form.hidden_tag() }}
+                <!-- 添加隐藏的photo_id字段 -->
+                <input type="hidden" id="photo_id" name="photo_id" value="">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="target_album_id">
+                        目标相册
+                    </label>
+                    {{ form.target_album_id(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]">移动</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 新增照片查看模态框 - 纯CSS+JS实现 -->
+<div id="photoViewerModal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+    <button type="button" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300" onclick="closePhotoViewer()">
+        <i class="fas fa-times"></i>
+    </button>
+    <!-- 单一图片容器 -->
+    <div class="max-w-[90vw] max-h-[90vh] p-4">
+        <img id="viewerImage" src="" alt="照片查看" class="max-w-full max-h-[80vh] mx-auto object-contain">
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// 添加脚本加载验证
+console.log('extra_js脚本块开始执行');
+
+// 添加DOM加载完成事件监听
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM加载完成，开始绑定事件');
+    
+    // 为所有删除照片按钮绑定事件
+    document.querySelectorAll('.delete-photo-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            const photoId = this.getAttribute('data-photo-id');
+            confirmDeletePhoto(photoId, e);
+        });
+    });
+    
+    // 为所有移动照片按钮绑定事件
+    document.querySelectorAll('.move-photo-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            const photoId = this.getAttribute('data-photo-id');
+            openMoveModal(photoId);
+        });
+    });
+});
+
 // 删除照片确认
 function confirmDeletePhoto(photoId, event) {
     event.stopPropagation();
     if (confirm('确定要删除这张照片吗？此操作不可恢复。')) {
-        fetch(`{{ url_for('main.delete_photo', photo_id=0) }}${photoId}`, {
+        // 从meta标签获取CSRF令牌
+        const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+        if (!csrfToken) {
+            console.error('CSRF Token获取失败');
+            alert('安全验证失败，请刷新页面重试');
+            return;
+        }
+        // 直接构建URL，避免Jinja解析整数参数
+        fetch(`/admin/photos/delete/${photoId}`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrf_token')
+                'X-CSRFToken': csrfToken
             }
         }).then(response => {
             if (response.ok) {
@@ -93,46 +178,119 @@ function confirmDeletePhoto(photoId, event) {
     }
 }
 
-// 删除相册确认
-function confirmDeleteAlbum(albumId) {
-    if (confirm('确定要删除这个相册吗？所有照片将被永久删除。')) {
-        fetch(`{{ url_for('main.delete_album', album_id=0) }}${albumId}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrf_token')
+// 删除相册确认 - 修改URL构建方式
+window.confirmDeleteAlbum = function(albumId) {
+    try {
+        console.log('[阶段1] 函数开始执行，相册ID类型:', typeof albumId, '值:', albumId);
+        
+        if (isNaN(albumId) || albumId <= 0) {
+            alert('无效的相册ID: ' + albumId);
+            return;
+        }
+        
+        if (confirm('确定要删除这个相册吗？此操作不可恢复。')) {
+            // 1. 立即隐藏相册内容并显示删除进度
+            const albumContainer = document.getElementById('album-container');
+            const deleteProgress = document.getElementById('delete-progress');
+            
+            if (albumContainer && deleteProgress) {
+                albumContainer.classList.add('hidden');
+                deleteProgress.classList.remove('hidden');
             }
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '{{ url_for('main.memories') }}';
-            } else {
-                alert('删除失败，请重试');
+            
+            // 2. 直接构建URL，避免Jinja解析整数参数
+            const url = `/admin/albums/delete/${albumId}`;
+            console.log('[阶段3] 构建URL:', url);
+            
+            // 3. 获取CSRF令牌
+            const csrfToken = document.querySelector('meta[name="csrf_token"]').content;
+            if (!csrfToken) {
+                alert('安全验证失败，请刷新页面重试');
+                return;
             }
-        });
+            
+            console.log('[阶段4] 发送异步删除请求...');
+            // 4. 发送异步删除请求
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            }).then(response => {
+                console.log('[阶段5] 服务器响应状态:', response.status);
+                // 5. 无论成功与否，3秒后跳转到相册列表
+                setTimeout(() => {
+                    window.location.href = '{{ url_for('main.memories') }}';
+                }, 3000);
+            }).catch(error => {
+                console.error('[网络错误]', error);
+                setTimeout(() => {
+                    window.location.href = '{{ url_for('main.memories') }}';
+                }, 3000);
+            });
+        } else {
+            console.log('[阶段2] 用户取消删除');
+        }
+    } catch (e) {
+        console.error('[致命错误] 函数执行中断:', e);
+        alert('执行删除时发生错误: ' + e.message);
     }
 }
 
 // 打开移动照片模态框
-function openMovePhotoModal(photoId, event) {
-    event.stopPropagation();
-    document.getElementById('photoId').value = photoId;
-    var moveModal = new bootstrap.Modal(document.getElementById('movePhotoModal'));
-    moveModal.show();
+function openMoveModal(photoId) {
+    // 设置隐藏字段的值
+    document.getElementById('photo_id').value = photoId;
+    // 显示模态框
+    const modal = document.getElementById('movePhotoModal');
+    const modalContent = document.getElementById('moveModalContent');
+    modal.classList.remove('hidden');
+    // 触发动画
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
 }
 
-// 获取CSRF Token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+function closeMoveModal() {
+    const modal = document.getElementById('movePhotoModal');
+    const modalContent = document.getElementById('moveModalContent');
+    // 隐藏模态框
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
 }
+</script>
+
+<script>
+// 简化版照片查看功能 - 无Bootstrap依赖
+function openPhotoViewer(imageUrl) {
+    const modal = document.getElementById('photoViewerModal');
+    const viewerImage = document.getElementById('viewerImage');
+    viewerImage.src = imageUrl;
+    // 显示模态框
+    modal.classList.remove('hidden');
+    // 阻止背景滚动
+    document.body.style.overflow = 'hidden';
+}
+
+// 简化版关闭照片查看器函数
+function closePhotoViewer() {
+    const modal = document.getElementById('photoViewerModal');
+    modal.classList.add('hidden');
+    // 恢复背景滚动
+    document.body.style.overflow = '';
+}
+
+// 添加点击模态框背景关闭功能
+document.getElementById('photoViewerModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePhotoViewer();
+    }
+});
+
+console.log('extra_js脚本块执行完成');
 </script>
 {% endblock %}
