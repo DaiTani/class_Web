@@ -331,8 +331,8 @@ def toggle_sticky(post_id):
         current_app.logger.error(f"CSRF验证失败: {str(e)}")
         return jsonify({'status': 'error', 'message': 'CSRF令牌验证失败'}), 400
     
-    # 检查是否为管理员
-    if not current_user.is_admin:
+    # 检查是否为管理员或超级管理员
+    if current_user.role not in ['admin', 'super_admin']:
         return jsonify({'status': 'error', 'message': '只有管理员可以设置置顶帖子'}), 403
     
     post = Post.query.get_or_404(post_id)

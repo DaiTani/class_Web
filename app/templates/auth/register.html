@@ -19,12 +19,23 @@
                 <!-- 添加CSRF令牌字段 -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-4">
-                    <label for="username" class="block mb-2 text-sm font-medium text-gray-700">用户名</label>
-                    <input type="text" id="username" name="username" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                    <div class="form-group">
+                        {{ form.username.label(class="form-control-label") }}  <!-- 确保标签显示为"昵称" -->
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username(class="form-control form-control-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200") }}
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="mb-4">
-                    <label for="email" class="block mb-2 text-sm font-medium text-gray-700">邮箱</label>
-                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
+                    <label for="student_id" class="block mb-2 text-sm font-medium text-gray-700">学号</label>
+                    <input type="text" id="student_id" name="student_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
                 </div>
                 <div class="mb-4">
                     <label for="password" class="block mb-2 text-sm font-medium text-gray-700">密码</label>

@@ -12,11 +12,11 @@
     <!-- 帖子标题区域 -->
     <div class="mb-8 border-b pb-4 bg-white rounded-xl shadow-sm p-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ post.title }}</h1>
-        <p class="text-gray-600 mb-4">发布者: {{ post.author.name }}</p>
+        <p class="text-gray-600 mb-4">发布者: {{ post.author.nickname }}</p>
         <div class="flex items-center text-gray-500 text-sm gap-4 mb-2">
             <div class="flex items-center">
                 <img src="https://picsum.photos/id/{{ post.author_id }}/32/32" alt="用户头像" class="w-6 h-6 rounded-full mr-2">
-                <span>{{ post.author.name }}</span>
+                <span>{{ post.author.nickname }}</span>
             </div>
             <span class="flex items-center"><i class="far fa-clock mr-1"></i> {{ post.local_created_at.strftime('%Y-%m-%d') }}</span>
             <span class="flex items-center"><i class="far fa-eye mr-1"></i> {{ post.views }} 浏览</span>
@@ -27,7 +27,7 @@
             <button id="toggle-sticky-btn" class="text-blue-500 hover:text-blue-700 ml-2">
                 <i class="fas fa-thumbtack mr-1"></i> {% if post.is_sticky %}取消置顶{% else %}置顶{% endif %}
             </button>
-            {% if current_user.is_authenticated and (current_user.id == post.author_id or current_user.is_admin) %}
+            {% if current_user.is_authenticated and (current_user.id == post.author_id or current_user.role in ['admin', 'super_admin']) %}
             <button id="delete-post-btn" class="text-red-500 hover:text-red-700 ml-2" data-post-id="{{ post.id }}">
                 <i class="fas fa-trash-alt mr-1"></i> 删除
             </button>
@@ -64,7 +64,7 @@
             <div class="comment-item border-b pb-4 last:border-0 last:pb-0" data-comment-id="{{ comment.id }}">
                 <div class="comment-author flex items-center mb-2">
                     <img src="https://picsum.photos/id/{{ comment.author_id }}/32/32" alt="用户头像" class="w-8 h-8 rounded-full mr-2 border-2 border-gray-100">
-                    <span class="font-medium">{{ comment.author.name }}</span>
+                    <span class="font-medium">{{ comment.author.nickname }}</span>
                     <span class="text-gray-500 text-sm ml-2">{{ comment.local_created_at.strftime('%Y-%m-%d %H:%M') }}</span>
                 </div>
                 <div class="comment-content mb-2 bg-gray-50 p-3 rounded-lg">{{ comment.content }}</div>

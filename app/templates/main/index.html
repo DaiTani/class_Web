@@ -84,7 +84,7 @@
     <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
         <h3 class="text-xl font-bold text-white flex items-center">
             <i class="fas fa-bullhorn mr-2 animate-pulse"></i>班级公告
-            {% if current_user.is_authenticated and current_user.is_admin %}
+            {% if current_user.is_authenticated and current_user.role in ['admin', 'super_admin'] %}
                 <a href="{{ url_for('main.add_announcement') }}" class="ml-4 text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition duration-200">
                     <i class="fas fa-plus-circle mr-1"></i>添加
                 </a>
@@ -108,7 +108,7 @@
                     </div>
                 {% endfor %}
             </div>
-            {% if current_user.is_authenticated and current_user.is_admin %}
+            {% if current_user.is_authenticated and current_user.role in ['admin', 'super_admin'] %}
                 <div class="mt-6 text-right">
                     <a href="{{ url_for('main.manage_announcements') }}" class="text-blue-600 hover:text-indigo-800 text-sm font-medium flex items-center ml-auto">
                         管理所有公告 <i class="fas fa-arrow-right ml-1"></i>

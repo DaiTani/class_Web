@@ -107,7 +107,7 @@
                     </a>
                     {% if current_user.is_authenticated %}
                         <a href="{{ url_for('auth.profile') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-user mr-2"></i>{{ current_user.name }}
+                            <i class="fas fa-user mr-2"></i>{{ current_user.nickname }}
                         </a>
                         <a href="{{ url_for('auth.logout') }}" class="px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors">
                             <i class="fas fa-sign-out-alt mr-2"></i>退出
@@ -134,7 +134,7 @@
                 <a href="{{ url_for('main.memories') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">回忆录</a>
                 <a href="{{ url_for('main.about') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">关于我们</a>
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('auth.profile') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">{{ current_user.name }}</a>
+                <a href="{{ url_for('auth.profile') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">{{ current_user.nickname }}</a>
                 <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">退出</a>
                 {% else %}
                 <a href="{{ url_for('auth.register') }}" class="block px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">注册</a>

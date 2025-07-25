@@ -116,10 +116,14 @@ class Photo(db.Model):
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    # 移除email字段，添加student_id作为登录凭证
+    student_id = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    name = db.Column(db.String(64), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    nickname = db.Column(db.String(64), nullable=False)  # 将name改为nickname
+    # 添加新字段
+    id_card = db.Column(db.String(20))  # 身份证号
+    is_active = db.Column(db.Integer, default=0)  # 0-未激活, 1-激活
+    role = db.Column(db.String(20), default='guest')  # guest/student/admin/super_admin
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)  # 添加此行跟踪最后活动时间
@@ -132,4 +136,4 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f'<User {self.name}>'
+        return f'<User {self.nickname}>'  # 更新__repr__方法
